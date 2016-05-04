@@ -62,7 +62,7 @@ public class SessionStarter implements ServletContextListener {
      * @see ServletContextListener#contextDestroyed(ServletContextEvent)
      */
     public void contextDestroyed(ServletContextEvent arg0)  { 
-//    	sm.terminateSession();
+    	sm.terminateSession();
     }
 	
 }

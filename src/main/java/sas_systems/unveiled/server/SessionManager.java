@@ -60,7 +60,7 @@ public class SessionManager {
     	this.host = host;
     	this.payloadType = payloadType;
     	
-    	if(dataPort%2 != 0) {
+    	if(port%2 != 0) {
     		LOG.warn("Data port was uneven, switching to an even port number to be RFC compliant!");
     		this.dataPort = port+1;
     		this.controlPort = port+2;
@@ -76,7 +76,19 @@ public class SessionManager {
     	return this.session.init();
     }
     
-    public boolean isRunning() {
+    public String getHost() {
+		return host;
+	}
+
+	public int getDataPort() {
+		return dataPort;
+	}
+
+	public int getControlPort() {
+		return controlPort;
+	}
+
+	public boolean isRunning() {
     	return this.session.isRunning();
     }
     

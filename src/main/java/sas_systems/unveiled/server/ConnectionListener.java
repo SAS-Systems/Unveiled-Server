@@ -46,6 +46,8 @@ public class ConnectionListener extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.getWriter().append("Served at: ").append(request.getContextPath()).append("\n");
 		response.getWriter().append("RTP session is running: ").append(String.valueOf(sm.isRunning()));
+		response.getWriter().append("\nsession is running on: " + sm.getHost() + ":" + sm.getControlPort() + "(data) and "
+				+ sm.getHost() + ":" + sm.getControlPort() + "(control)");
 	}
 
 	/**

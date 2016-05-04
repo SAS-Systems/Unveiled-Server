@@ -7,7 +7,7 @@
         <dependent-module archiveName="imflux-0.0.2-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/imflux/imflux">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <property name="java-output-path" value="/Unveiled-Server/target/classes"/>
         <property name="context-root" value="Unveiled-Server"/>
+        <property name="java-output-path" value="/Unveiled-Server/target/classes"/>
     </wb-module>
 </project-modules>
