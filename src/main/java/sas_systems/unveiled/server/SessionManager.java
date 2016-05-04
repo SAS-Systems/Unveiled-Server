@@ -62,11 +62,14 @@ public class SessionManager {
     	
     	if(port%2 != 0) {
     		LOG.warn("Data port was uneven, switching to an even port number to be RFC compliant!");
-    		this.dataPort = port+1;
-    		this.controlPort = port+2;
+    		System.out.println("Data port was uneven, switching to an even port number to be RFC compliant!");
+    		port++;
     	}
+    	
+    	this.dataPort = port;
+    	this.controlPort = port+1;
     	LOG.debug("RTP session will listen on {}:{} and {}:{}", this.host, this.dataPort, this.host, this.controlPort);
-    	System.out.println(this.dataPort + "/" + this.controlPort);
+    	System.out.println("RTP session listening on " + this.host + ":" + this.dataPort + " / " + this.host + ":" + this.controlPort);
     	RtpParticipant local = RtpParticipant.createReceiver(this.host, this.dataPort, this.controlPort);
     	this.session = new MultiParticipantSession(this.ID, this.payloadType, local);
 		this.session.setUseNio(true);

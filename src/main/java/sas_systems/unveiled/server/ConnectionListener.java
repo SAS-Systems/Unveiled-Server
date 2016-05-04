@@ -24,6 +24,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.rtsp.RtspMethods;
+
 /**
  * Servlet implementation class ConnectionListener
  */
@@ -46,7 +49,7 @@ public class ConnectionListener extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.getWriter().append("Served at: ").append(request.getContextPath()).append("\n");
 		response.getWriter().append("RTP session is running: ").append(String.valueOf(sm.isRunning()));
-		response.getWriter().append("\nsession is running on: " + sm.getHost() + ":" + sm.getControlPort() + "(data) and "
+		response.getWriter().append("\nsession is running on: " + sm.getHost() + ":" + sm.getDataPort() + "(data) and "
 				+ sm.getHost() + ":" + sm.getControlPort() + "(control)");
 	}
 

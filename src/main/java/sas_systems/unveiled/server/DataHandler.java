@@ -16,6 +16,9 @@
 
 package sas_systems.unveiled.server;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,17 +32,37 @@ public class DataHandler implements RtpSessionDataListener {
 	private static final Logger LOG = LoggerFactory.getLogger(DataHandler.class);
 	
 	private final int payloadType;
+	private final Map<Long, RtpSessionDataListener> dataListeners;
 	
 	public DataHandler(int payloadType) {
 		this.payloadType = payloadType;
+		this.dataListeners = new HashMap<>();
 	}
 
 	@Override
 	public void dataPacketReceived(RtpSession session, RtpParticipantInfo participant, DataPacket packet) {
+		final long ssrc = participant.getSsrc();
+		RtpSessionDataListener listener = dataListeners.get(ssrc);
+		if(listener == null) {
+			listener = this.addDataListener(ssrc);
+		}
+		listener.dataPacketReceived(session, participant, packet);
+		
 		LOG.trace("DataHandler received DataPacket: {} from {}", packet, participant.getSsrc());
+		System.out.println("DataHandler received DataPacket: " + packet + " from " + participant.getSsrc());
 	}
 	
 	public int getPayloadType() {
 		return this.payloadType;
+	}
+	
+	private RtpSessionDataListener addDataListener(long ssrc) {
+		DataToFileWriter listener = new DataToFileWriter(this, ssrc, this.payloadType);
+		this.dataListeners.put(ssrc, listener);
+		return listener;
+	}
+	
+	public void removeDataListener(long ssrc) {
+		this.dataListeners.remove(ssrc);
 	}
 }
