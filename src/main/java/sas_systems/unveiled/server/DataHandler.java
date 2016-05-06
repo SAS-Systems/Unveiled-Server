@@ -32,10 +32,12 @@ public class DataHandler implements RtpSessionDataListener {
 	private static final Logger LOG = LoggerFactory.getLogger(DataHandler.class);
 	
 	private final int payloadType;
+	private final String mediaLocation;
 	private final Map<Long, RtpSessionDataListener> dataListeners;
 	
-	public DataHandler(int payloadType) {
+	public DataHandler(int payloadType, String mediaLocation) {
 		this.payloadType = payloadType;
+		this.mediaLocation = mediaLocation;
 		this.dataListeners = new HashMap<>();
 	}
 
@@ -44,7 +46,7 @@ public class DataHandler implements RtpSessionDataListener {
 		final long ssrc = participant.getSsrc();
 		RtpSessionDataListener listener = dataListeners.get(ssrc);
 		if(listener == null) {
-			listener = this.addDataListener(ssrc);
+			listener = addDataListener(ssrc);
 		}
 		listener.dataPacketReceived(session, participant, packet);
 		
@@ -53,16 +55,16 @@ public class DataHandler implements RtpSessionDataListener {
 	}
 	
 	public int getPayloadType() {
-		return this.payloadType;
+		return payloadType;
 	}
 	
 	private RtpSessionDataListener addDataListener(long ssrc) {
-		DataToFileWriter listener = new DataToFileWriter(this, ssrc, this.payloadType);
-		this.dataListeners.put(ssrc, listener);
+		DataToFileWriter listener = new DataToFileWriter(ssrc, payloadType, mediaLocation);
+		dataListeners.put(ssrc, listener);
 		return listener;
 	}
 	
 	public void removeDataListener(long ssrc) {
-		this.dataListeners.remove(ssrc);
+		dataListeners.remove(ssrc);
 	}
 }

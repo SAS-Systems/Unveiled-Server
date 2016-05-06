@@ -27,33 +27,36 @@ import sas_systems.imflux.session.RtpSessionDataListener;
 
 public class DataToFileWriter implements RtpSessionDataListener {
 	
-	private final DataHandler parent;
 	private final long ssrc;
 	private final int payloadType;
+	private final FileWriter fileWriter;
 	private File fileHandle;
 	private OutputStream out;
 
-	public DataToFileWriter(DataHandler parent, long ssrc, int payloadType) {
-		this.parent = parent;
+	public DataToFileWriter(long ssrc, int payloadType, String fileLocation) {
 		this.ssrc = ssrc;
 		this.payloadType = payloadType;
-		
-		try {
-			initFileHandle();
-			this.out = new FileOutputStream(fileHandle);
-		} catch (IOException e) {
-			System.err.println(e.toString());
-			this.out = null;
-		}
+		this.fileWriter = new FileWriter("test", fileLocation, this.payloadType + "_file" + this.ssrc, "unv");
+//		try {
+//			initFileHandle();
+//			this.out = new FileOutputStream(fileHandle);
+//		} catch (IOException e) {
+//			System.err.println(e.toString());
+//			this.out = null;
+//		}
 	}
 
 	@Override
 	public void dataPacketReceived(RtpSession session, RtpParticipantInfo participant, DataPacket packet) {
+		if(packet.getSsrc() != ssrc)
+			return;
+		
 		try {
-			if(out != null) {
-				out.write(packet.getDataAsArray(), 0, packet.getDataSize());
-				System.out.println(packet.getDataSize() + " bytes were written to " + fileHandle.getPath());
-			}
+			fileWriter.writeToFile(packet);
+//			if(out != null) {
+//				out.write(packet.getDataAsArray(), 0, packet.getDataSize());
+//				System.out.println(packet.getDataSize() + " bytes were written to " + fileHandle.getPath());
+//			}
 		} catch (IOException e) {
 			System.err.println("Error during writing file!");
 		}
@@ -61,28 +64,27 @@ public class DataToFileWriter implements RtpSessionDataListener {
 
 	public boolean closeFile() {
 		try {
-			out.flush();
-			out.close();
-			System.out.println(fileHandle.getAbsolutePath() + " was created successfully");
-			return true;
+			fileWriter.close();
+//			out.flush();
+//			out.close();
+//			System.out.println(fileHandle.getAbsolutePath() + " was created successfully");
+//			return true;
 		} catch(IOException e) {
-			try {
-				out.close();
-			} catch (IOException e1) {
+//			try {
+//				out.close();
+//			} catch (IOException e1) {
 				System.err.println("File can not be closed. Removing listener from context regardless.");
-			}
-		} finally {
-			parent.removeDataListener(this.ssrc);
+//			}
 		}
 		return false;
 	}
 	
-	private void initFileHandle() throws IOException {
-		String catalinaHome = System.getenv("CATALINA_HOME"); // FIXME: isnt set -> returns null!
-		if(catalinaHome == null) 
-			catalinaHome = "C:/apache-tomcat-7.0.69"; 
-		
-		this.fileHandle = new File(catalinaHome + "/temp/" + this.payloadType + "_file" + this.ssrc + ".unv");
-		this.fileHandle.createNewFile();
-	}
+//	private void initFileHandle() throws IOException {
+//		String catalinaHome = System.getenv("CATALINA_HOME"); // FIXME: isnt set -> returns null!
+//		if(catalinaHome == null) 
+//			catalinaHome = "C:/apache-tomcat-7.0.69"; 
+//		
+//		this.fileHandle = new File(catalinaHome + "/temp/" + this.payloadType + "_file" + this.ssrc + ".unv");
+//		this.fileHandle.createNewFile();
+//	}
 }

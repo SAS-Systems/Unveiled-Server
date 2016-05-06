@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.rtsp.RtspDecoder;
 import io.netty.handler.codec.rtsp.RtspMethods;
 
 /**
@@ -35,6 +36,8 @@ public class ConnectionListener extends HttpServlet {
 	
 	@EJB
 	private SessionManager sm;
+	@EJB
+	private FileStream stream;
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -48,9 +51,12 @@ public class ConnectionListener extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.getWriter().append("Served at: ").append(request.getContextPath()).append("\n");
-		response.getWriter().append("RTP session is running: ").append(String.valueOf(sm.isRunning()));
-		response.getWriter().append("\nsession is running on: " + sm.getHost() + ":" + sm.getDataPort() + "(data) and "
-				+ sm.getHost() + ":" + sm.getControlPort() + "(control)");
+		response.getWriter().append("RTP session is running: ").append(String.valueOf(sm.isRunning())).append("\n");
+		response.getWriter().append("\nsession is running on: ").append(sm.getHost()).append(":")
+				.append(String.valueOf(sm.getDataPort())).append("(data) and ").append(String.valueOf(sm.getHost()))
+				.append(":").append(String.valueOf(sm.getControlPort())).append("(control)").append("\n");
+		response.getWriter().append("FileStream object id: ").append(String.valueOf(stream.getId())).append("\n");
+		response.getWriter().append(getServletContext().getRealPath("/")).append("\n");
 	}
 
 	/**

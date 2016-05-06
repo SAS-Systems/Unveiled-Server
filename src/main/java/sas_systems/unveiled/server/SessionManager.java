@@ -17,26 +17,28 @@
 package sas_systems.unveiled.server;
 
 import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import javax.ejb.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sas_systems.imflux.participant.RtpParticipant;
 import sas_systems.imflux.session.MultiParticipantSession;
+import sas_systems.imflux.session.RtpSessionDataListener;
 
 /**
  * Session Bean implementation class SessionManager
  */
-@Stateless
 @LocalBean
+@Singleton
 public class SessionManager {
 	
 	public static final int PAYLOAD_TYPE_H263 = 34;
-	public static final int DEFAULT_DATA_PORT = 6982;
-	public static final int DEFAULT_CONTROL_PORT = 6983;
-	
+	private static final int DEFAULT_DATA_PORT = 6982;
+	private static final int DEFAULT_CONTROL_PORT = 6983;
 	private static final Logger LOG = LoggerFactory.getLogger(SessionManager.class);
+	
+	private String mediaLocation;
 	
 	private final String ID = "Unveiled/0";
 	
@@ -45,6 +47,7 @@ public class SessionManager {
 	private int dataPort;
 	private int controlPort;
 	private int payloadType;
+	
 
     /**
      * Default constructor. 
@@ -71,12 +74,12 @@ public class SessionManager {
     	LOG.debug("RTP session will listen on {}:{} and {}:{}", this.host, this.dataPort, this.host, this.controlPort);
     	System.out.println("RTP session listening on " + this.host + ":" + this.dataPort + " / " + this.host + ":" + this.controlPort);
     	RtpParticipant local = RtpParticipant.createReceiver(this.host, this.dataPort, this.controlPort);
-    	this.session = new MultiParticipantSession(this.ID, this.payloadType, local);
-		this.session.setUseNio(true);
-		this.session.setAutomatedRtcpHandling(true);
-		this.session.addDataListener(new DataHandler(this.payloadType));
+    	session = new MultiParticipantSession(this.ID, this.payloadType, local);
+		session.setUseNio(true);
+		session.setAutomatedRtcpHandling(true);
+		session.addDataListener(new DataHandler(this.payloadType, this.mediaLocation));
 		
-    	return this.session.init();
+    	return session.init();
     }
     
     public String getHost() {
@@ -92,12 +95,32 @@ public class SessionManager {
 	}
 
 	public boolean isRunning() {
-    	return this.session.isRunning();
+    	return session.isRunning();
     }
     
     public void terminateSession() {
-    	if(this.session != null) {
-    		this.session.terminate();
+    	if(session != null) {
+    		session.terminate();
     	}
     }
+    
+    public void addDataListener(RtpSessionDataListener listener) {
+    	session.addDataListener(listener);
+    }
+    
+    public void removeDataListener(RtpSessionDataListener listener) {
+    	session.removeDataListener(listener);
+    }
+
+	public int getPayloadType() {
+		return payloadType;
+	}
+
+	public String getMediaLocation() {
+		return mediaLocation;
+	}
+
+	public void setMediaLocation(String resourceLocation) {
+		this.mediaLocation = resourceLocation;
+	}
 }

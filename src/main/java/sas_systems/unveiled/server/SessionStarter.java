@@ -47,6 +47,10 @@ public class SessionStarter implements ServletContextListener {
      */
     public void contextInitialized(ServletContextEvent arg0)  {
     	LOG.trace("Initializing session...");
+    	// set resource location for videos etc
+    	final String rootPath = arg0.getServletContext().getRealPath("/");
+    	sm.setMediaLocation(rootPath + "media\\");
+    	
     	// TODO: Load host and port from config-file or sth else
     	String host = "localhost";
     	int dataPort = 6982; // controlPort will be on 6983
