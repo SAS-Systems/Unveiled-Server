@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import sas_systems.imflux.packet.DataPacket;
 import sas_systems.imflux.participant.RtpParticipantInfo;
-import sas_systems.imflux.session.RtpSession;
-import sas_systems.imflux.session.RtpSessionDataListener;
+import sas_systems.imflux.session.rtp.RtpSession;
+import sas_systems.imflux.session.rtp.RtpSessionDataListener;
 
 public class DataHandler implements RtpSessionDataListener {
 	

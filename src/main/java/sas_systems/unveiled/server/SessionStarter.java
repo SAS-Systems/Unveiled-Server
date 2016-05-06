@@ -24,6 +24,8 @@ import javax.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sas_systems.imflux.session.rtsp.RtspSession;
+
 /**
  * Application Lifecycle Listener implementation class SessionStarter
  *
@@ -60,6 +62,8 @@ public class SessionStarter implements ServletContextListener {
     		LOG.error("Could not initialize RTP session!");
     		throw new IllegalArgumentException("Configuration of RTP session was incorrect, so it could not be started.");
     	}
+    	
+    	RtspSession rtsp = new RtspSession(12345);
     }
     
 	/**
