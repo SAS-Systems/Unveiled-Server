@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sas_systems.imflux.session.rtsp.RtspSession;
+import sas_systems.imflux.session.rtsp.SimpleRtspSession;
 
 /**
  * Application Lifecycle Listener implementation class SessionStarter
@@ -37,6 +38,7 @@ public class SessionStarter implements ServletContextListener {
 	
 	@EJB
 	private SessionManager sm;
+	private RtspSession rtsp;
 
     /**
      * Default constructor. 
@@ -63,7 +65,13 @@ public class SessionStarter implements ServletContextListener {
     		throw new IllegalArgumentException("Configuration of RTP session was incorrect, so it could not be started.");
     	}
     	
-    	RtspSession rtsp = new RtspSession(12345);
+    	this.rtsp = new SimpleRtspSession("RTSP session 0");
+    	wasSuccessful = rtsp.init();
+    	if(!wasSuccessful) {
+    		LOG.error("Could not initialize RTSP session!");
+    		throw new IllegalArgumentException("Configuration of RTSP session was incorrect, so it could not be started.");
+    	}
+    	System.out.println("Sessions successfully created and initialized");
     }
     
 	/**
@@ -71,6 +79,7 @@ public class SessionStarter implements ServletContextListener {
      */
     public void contextDestroyed(ServletContextEvent arg0)  { 
     	sm.terminateSession();
+    	rtsp.terminate();
     }
 	
 }
