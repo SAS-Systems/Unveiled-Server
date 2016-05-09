@@ -65,7 +65,7 @@ public class SessionStarter implements ServletContextListener {
     		throw new IllegalArgumentException("Configuration of RTP session was incorrect, so it could not be started.");
     	}
     	
-    	this.rtsp = new SimpleRtspSession("RTSP session 0");
+    	this.rtsp = new SimpleRtspSession("RTSP session 0", sm.getLocalParticipant());
     	wasSuccessful = rtsp.init();
     	if(!wasSuccessful) {
     		LOG.error("Could not initialize RTSP session!");

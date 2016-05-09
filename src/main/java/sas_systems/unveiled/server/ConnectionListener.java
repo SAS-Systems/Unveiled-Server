@@ -57,6 +57,8 @@ public class ConnectionListener extends HttpServlet {
 				.append(":").append(String.valueOf(sm.getControlPort())).append("(control)").append("\n");
 		response.getWriter().append("FileStream object id: ").append(String.valueOf(stream.getId())).append("\n");
 		response.getWriter().append(getServletContext().getRealPath("/")).append("\n");
+		DatabaseConnector connector = new DatabaseConnector();
+		connector.close();
 	}
 
 	/**

@@ -123,4 +123,8 @@ public class SessionManager {
 	public void setMediaLocation(String resourceLocation) {
 		this.mediaLocation = resourceLocation;
 	}
+	
+	public RtpParticipant getLocalParticipant() {
+		return this.session.getLocalParticipant();
+	}
 }
