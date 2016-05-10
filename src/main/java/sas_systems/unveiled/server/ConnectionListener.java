@@ -17,16 +17,13 @@
 package sas_systems.unveiled.server;
 
 import java.io.IOException;
+import java.util.Date;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.rtsp.RtspDecoder;
-import io.netty.handler.codec.rtsp.RtspMethods;
 
 /**
  * Servlet implementation class ConnectionListener
@@ -58,6 +55,8 @@ public class ConnectionListener extends HttpServlet {
 		response.getWriter().append("FileStream object id: ").append(String.valueOf(stream.getId())).append("\n");
 		response.getWriter().append(getServletContext().getRealPath("/")).append("\n");
 		DatabaseConnector connector = new DatabaseConnector();
+		FilePOJO file = new FilePOJO(1, "testfile", "testfile", "testurl", "testthumbnailurl", "video/mp4", new Date(), 256, 5.6, 10.4, false, true, 23, 860, 240, "860x240");
+		response.getWriter().append(file + " succesfully inserted: " + connector.insertFile(file));
 		connector.close();
 	}
 

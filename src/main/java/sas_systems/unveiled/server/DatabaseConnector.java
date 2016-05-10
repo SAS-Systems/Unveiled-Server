@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,15 +23,15 @@ public class DatabaseConnector {
 	public DatabaseConnector() {
 		final String jdbcConnection = "jdbc:mysql://" + DB_HOST + "/" + DB_NAME + "?useSSL=false" /*&user=" + USER + "&password=" + PASSWORD*/;
 		try {
-			Class.forName(/*"com.mysql.jdbc.Driver"*/ "com.mysql.cj.jdbc.Driver").newInstance();
+			Class.forName("com.mysql.jdbc.Driver" /*"com.mysql.cj.jdbc.Driver"*/).newInstance();
 			conn = DriverManager.getConnection(jdbcConnection, USER, PASSWORD);
 		} catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally {
 			close();
 		}
 	}
@@ -42,12 +43,15 @@ public class DatabaseConnector {
 		// build sql statement
 		sql.append("INSERT INTO ")
 			.append(DB_NAME).append(".").append(fileTable).append(" ")
+			.append("( ").append("owner_id, caption, filename, file_url, thumbnail_url, mediatype, ")
+			.append("uploaded_at, size, lat, lng, public, verified, length, height, width, resolution")
+			.append(" ) ")
 			.append("VALUES (")
 			.append("?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ")
 			.append(")");
 		
 		try {
-			final PreparedStatement stmt = conn.prepareStatement(sql.toString());
+			final PreparedStatement stmt = conn.prepareStatement(sql.toString(), Statement.RETURN_GENERATED_KEYS);
 			
 			/* append parameters:
 			 * file (id, owner_id, caption, filename, file_url, thumbnail_url,
@@ -61,7 +65,8 @@ public class DatabaseConnector {
 			stmt.setString(i++, file.getFilename());
 			stmt.setString(i++, file.getFile_url());
 			stmt.setString(i++, file.getThumbnail_url());
-			stmt.setLong(i++, file.getUploaded_at().getTime());
+			stmt.setString(i++, file.getMediatype());
+			stmt.setLong(i++, file.getUploaded_at().getTime()/1000);
 			stmt.setInt(i++, file.getSize());
 			stmt.setDouble(i++, file.getLat());
 			stmt.setDouble(i++, file.getLng());

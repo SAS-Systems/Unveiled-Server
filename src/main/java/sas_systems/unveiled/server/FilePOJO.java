@@ -2,6 +2,10 @@ package sas_systems.unveiled.server;
 
 import java.util.Date;
 
+/**
+ * File POJO class. Represents a database entity.
+ * 
+ */
 public class FilePOJO {
 	
 	private int owner_id;
@@ -21,9 +25,28 @@ public class FilePOJO {
 	private int width;
 	private String resolution;
 	
+	/**
+	 * 
+	 * @param owner_id foreign key
+	 * @param caption
+	 * @param filename with suffix
+	 * @param file_url absolute
+	 * @param thumbnail_url absolute
+	 * @param mediatype MIME type
+	 * @param uploaded_at Date object -> will be converted in UNIX timestamp (in seconds)
+	 * @param size byte
+	 * @param lat
+	 * @param lng
+	 * @param isPublic
+	 * @param isVerfied
+	 * @param length in seconds
+	 * @param heigth
+	 * @param width
+	 * @param resolution eg. 1080, 1440, 2160, 4320
+	 */
 	public FilePOJO(int owner_id, String caption, String filename, String file_url, String thumbnail_url,
 			String mediatype, Date uploaded_at, int size, double lat, double lng, boolean isPublic, boolean isVerfied,
-			int heigth, int width, String resolution) {
+			int length, int heigth, int width, String resolution) {
 		super();
 		this.owner_id = owner_id;
 		this.caption = caption;
@@ -37,6 +60,7 @@ public class FilePOJO {
 		this.lng = lng;
 		this.isPublic = isPublic;
 		this.isVerfied = isVerfied;
+		this.length = length;
 		this.heigth = heigth;
 		this.width = width;
 		this.resolution = resolution;
