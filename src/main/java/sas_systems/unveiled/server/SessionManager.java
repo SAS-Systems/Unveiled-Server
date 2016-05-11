@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package sas_systems.unveiled.server;
 
 import javax.ejb.LocalBean;
@@ -28,14 +27,14 @@ import sas_systems.imflux.session.rtp.RtpSessionDataListener;
 
 /**
  * Session Bean implementation class SessionManager
+ * 
+ * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
  */
 @LocalBean
 @Singleton
 public class SessionManager {
 	
 	public static final int PAYLOAD_TYPE_H263 = 34;
-	private static final int DEFAULT_DATA_PORT = 6982;
-	private static final int DEFAULT_CONTROL_PORT = 6983;
 	private static final Logger LOG = LoggerFactory.getLogger(SessionManager.class);
 	
 	private String mediaLocation;
@@ -55,22 +54,28 @@ public class SessionManager {
     public SessionManager() {
     }
     
-    public boolean initSession(int payloadType, String host) {
-    	return initSession(payloadType, host, SessionManager.DEFAULT_DATA_PORT);
+    public boolean initSession(int payloadType, String host, int port) {
+    	return initSession(payloadType, host, port, port+1);
     }
     
-    public boolean initSession(int payloadType, String host, int port) {
+    public boolean initSession(int payloadType, String host, int dataPort, int controlPort) {
     	this.host = host;
     	this.payloadType = payloadType;
     	
-    	if(port%2 != 0) {
-    		LOG.warn("Data port was uneven, switching to an even port number to be RFC compliant!");
+    	if(dataPort%2 != 0) {
+    		LOG.warn("DataPort was uneven, switching to an even dataPort number to be RFC compliant!");
     		System.out.println("Data port was uneven, switching to an even port number to be RFC compliant!");
-    		port++;
+    		dataPort++;
     	}
     	
-    	this.dataPort = port;
-    	this.controlPort = port+1;
+    	if(controlPort%2 == 0) {
+    		LOG.warn("ControlPort was even, switching to an uneven controlPort number to be RFC compliant!");
+    		System.out.println("Control port was even, switching to an uneven port number to be RFC compliant!");
+    		controlPort++;
+    	}
+    	
+    	this.dataPort = dataPort;
+    	this.controlPort = controlPort;
     	LOG.debug("RTP session will listen on {}:{} and {}:{}", this.host, this.dataPort, this.host, this.controlPort);
     	System.out.println("RTP session listening on " + this.host + ":" + this.dataPort + " / " + this.host + ":" + this.controlPort);
     	RtpParticipant local = RtpParticipant.createReceiver(this.host, this.dataPort, this.controlPort);

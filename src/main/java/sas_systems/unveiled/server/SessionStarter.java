@@ -16,6 +16,8 @@
 
 package sas_systems.unveiled.server;
 
+import java.util.Properties;
+
 import javax.ejb.EJB;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -29,7 +31,8 @@ import sas_systems.imflux.session.rtsp.SimpleRtspSession;
 
 /**
  * Application Lifecycle Listener implementation class SessionStarter
- *
+ * 
+ * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
  */
 @WebListener
 public class SessionStarter implements ServletContextListener {
@@ -39,11 +42,15 @@ public class SessionStarter implements ServletContextListener {
 	@EJB
 	private SessionManager sm;
 	private RtspSession rtsp;
+	
+	private Properties properties;
 
     /**
      * Default constructor. 
      */
     public SessionStarter() {
+    	// load properties from file containing host name, ports and the media location
+    	this.properties = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
     }
 
 	/**
@@ -53,12 +60,13 @@ public class SessionStarter implements ServletContextListener {
     	LOG.trace("Initializing session...");
     	// set resource location for videos etc
     	final String rootPath = arg0.getServletContext().getRealPath("/");
-    	sm.setMediaLocation(rootPath + "media\\");
+    	sm.setMediaLocation(rootPath + properties.getProperty(PropertiesLoader.SessionProps.REL_PATH_TO_MEDIA));
     	
-    	// TODO: Load host and port from config-file or sth else
-    	String host = "localhost";
-    	int dataPort = 6982; // controlPort will be on 6983
-    	boolean wasSuccessful = sm.initSession(SessionManager.PAYLOAD_TYPE_H263, host, dataPort);
+    	final String host = properties.getProperty(PropertiesLoader.SessionProps.HOST);
+    	final int dataPort = Integer.valueOf(properties.getProperty(PropertiesLoader.SessionProps.RTP_PORT));
+    	final int controlPort = Integer.valueOf(properties.getProperty(PropertiesLoader.SessionProps.RTCP_PORT));
+    	
+    	boolean wasSuccessful = sm.initSession(SessionManager.PAYLOAD_TYPE_H263, host, dataPort, controlPort);
     	
     	if(!wasSuccessful) {
     		LOG.error("Could not initialize RTP session!");

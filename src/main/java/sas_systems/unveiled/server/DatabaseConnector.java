@@ -1,7 +1,20 @@
+/*
+ * Copyright 2016 Sebastian Schmidl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package sas_systems.unveiled.server;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,27 +25,28 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
+ */
 public class DatabaseConnector {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(DatabaseConnector.class);
 	
-	private static final String USER = "unveiled";
-	private static final String PASSWORD = "";
-	private static final String DB_HOST = "sas.systemgrid.de";
-	private static final String DB_NAME = "unveiled";
-	
 	private Connection conn;
 	
-	private String user;
-	private String password;
-	private String host;
-	private String databaseName;
+	private final String user;
+	private final String password;
+	private final String host;
+	private final String databaseName;
 
 	public DatabaseConnector() {
 		// read properties file
-		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		final InputStream resource = classLoader.getResourceAsStream("database.properties");
-		loadPropertiesFromFile(resource);
+		final Properties dbProperties = PropertiesLoader.loadPropertiesFile(PropertiesLoader.DATABASE_PROPERTIES_FILE);
+		this.host = dbProperties.getProperty(PropertiesLoader.DBProps.DB_HOST);
+		this.user = dbProperties.getProperty(PropertiesLoader.DBProps.DB_USER);
+		this.password = dbProperties.getProperty(PropertiesLoader.DBProps.DB_PASSWORD);
+		this.databaseName = dbProperties.getProperty(PropertiesLoader.DBProps.DB_NAME);
 		
 		// open database connection
 		openConnection();
@@ -43,11 +57,14 @@ public class DatabaseConnector {
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
 			conn = DriverManager.getConnection(jdbcConnection, this.user, this.password);
+			
 		} catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-			e.printStackTrace();
+			LOG.error("Could not load JDBC driver for MySQL", e);
+			System.out.println("Could not load JDBC driver for MySQL");
 			close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			LOG.error(this.getClass().getSimpleName() + " was not able to establish connection to MySQL database!", e);
+			System.out.println(this.getClass().getSimpleName() + " was not able to establish connection to MySQL database!");
 			close();
 		}
 	}
@@ -58,7 +75,7 @@ public class DatabaseConnector {
 		
 		// build sql statement
 		sql.append("INSERT INTO ")
-			.append(DB_NAME).append(".").append(fileTable).append(" ")
+			.append(this.databaseName).append(".").append(fileTable).append(" ")
 			.append("( ").append("owner_id, caption, filename, file_url, thumbnail_url, mediatype, ")
 			.append("uploaded_at, size, lat, lng, public, verified, length, height, width, resolution")
 			.append(" ) ")
@@ -113,23 +130,5 @@ public class DatabaseConnector {
 				LOG.error("Could not close database connection!", e);
 			}
 		}
-	}
-	
-	private void loadPropertiesFromFile(InputStream resource) {
-		final Properties dbProperties = new Properties();
-		try {
-			if(resource == null) {
-				throw new IOException("Resource could not be found!");
-			}
-			dbProperties.load(resource);
-		} catch (IOException e) {
-			System.out.println("Could not load database.properties file");
-			LOG.error("Could not load database.properties file", e);
-			e.printStackTrace();
-		}
-		this.host = dbProperties.getProperty("database.host", DB_HOST);
-		this.user = dbProperties.getProperty("database.user", USER);
-		this.password = dbProperties.getProperty("database.password", PASSWORD);
-		this.databaseName = dbProperties.getProperty("database.name", DB_NAME);
 	}
 }
