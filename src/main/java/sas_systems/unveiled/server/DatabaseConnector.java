@@ -1,10 +1,13 @@
 package sas_systems.unveiled.server;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,23 +17,36 @@ public class DatabaseConnector {
 	private static final Logger LOG = LoggerFactory.getLogger(DatabaseConnector.class);
 	
 	private static final String USER = "unveiled";
-	private static final String PASSWORD = "?";
-	private static final String DB_HOST = "sas.systemgrid.de" /*"185.5.10.12"*/;
+	private static final String PASSWORD = "";
+	private static final String DB_HOST = "sas.systemgrid.de";
 	private static final String DB_NAME = "unveiled";
 	
 	private Connection conn;
+	
+	private String user;
+	private String password;
+	private String host;
+	private String databaseName;
 
 	public DatabaseConnector() {
-		final String jdbcConnection = "jdbc:mysql://" + DB_HOST + "/" + DB_NAME + "?useSSL=false" /*&user=" + USER + "&password=" + PASSWORD*/;
+		// read properties file
+		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		final InputStream resource = classLoader.getResourceAsStream("database.properties");
+		loadPropertiesFromFile(resource);
+		
+		// open database connection
+		openConnection();
+	}
+	
+	private void openConnection() {
+		final String jdbcConnection = "jdbc:mysql://" + this.host + "/" + this.databaseName + "?useSSL=false";
 		try {
-			Class.forName("com.mysql.jdbc.Driver" /*"com.mysql.cj.jdbc.Driver"*/).newInstance();
-			conn = DriverManager.getConnection(jdbcConnection, USER, PASSWORD);
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
+			conn = DriverManager.getConnection(jdbcConnection, this.user, this.password);
 		} catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			close();
 		}
@@ -97,5 +113,23 @@ public class DatabaseConnector {
 				LOG.error("Could not close database connection!", e);
 			}
 		}
+	}
+	
+	private void loadPropertiesFromFile(InputStream resource) {
+		final Properties dbProperties = new Properties();
+		try {
+			if(resource == null) {
+				throw new IOException("Resource could not be found!");
+			}
+			dbProperties.load(resource);
+		} catch (IOException e) {
+			System.out.println("Could not load database.properties file");
+			LOG.error("Could not load database.properties file", e);
+			e.printStackTrace();
+		}
+		this.host = dbProperties.getProperty("database.host", DB_HOST);
+		this.user = dbProperties.getProperty("database.user", USER);
+		this.password = dbProperties.getProperty("database.password", PASSWORD);
+		this.databaseName = dbProperties.getProperty("database.name", DB_NAME);
 	}
 }

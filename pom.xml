@@ -43,11 +43,21 @@
 		<version>5.1.38</version>
 	</dependency>
     
-<!--     <dependency> -->
-<!-- 		<groupId>org.slf4j</groupId> -->
-<!-- 		<artifactId>slf4j-simple</artifactId> -->
-<!-- 		<version>1.7.21</version> -->
-<!-- 	</dependency> -->
+<!-- Logging Framework - LOG4J -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.12</version>
+		</dependency>
+
+		<!-- optionals -->
+		<dependency>
+			<optional>true</optional>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>2.4.1</version>
+			<scope>runtime</scope>
+		</dependency>
 
   </dependencies>
   

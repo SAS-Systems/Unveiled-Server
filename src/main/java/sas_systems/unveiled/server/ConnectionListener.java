@@ -56,7 +56,7 @@ public class ConnectionListener extends HttpServlet {
 		response.getWriter().append(getServletContext().getRealPath("/")).append("\n");
 		DatabaseConnector connector = new DatabaseConnector();
 		FilePOJO file = new FilePOJO(1, "testfile", "testfile", "testurl", "testthumbnailurl", "video/mp4", new Date(), 256, 5.6, 10.4, false, true, 23, 860, 240, "860x240");
-		response.getWriter().append(file + " succesfully inserted: " + connector.insertFile(file));
+//		response.getWriter().append(file + " succesfully inserted: " + connector.insertFile(file));
 		connector.close();
 	}
 
