@@ -16,7 +16,6 @@
 package sas_systems.unveiled.server;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -36,7 +35,7 @@ public class DataToFileWriter implements RtpSessionDataListener {
 	public DataToFileWriter(long ssrc, int payloadType, String fileLocation) {
 		this.ssrc = ssrc;
 		this.payloadType = payloadType;
-		this.fileWriter = new FileWriter("test", fileLocation, this.payloadType + "_file" + this.ssrc, "unv");
+		this.fileWriter = new FileWriter(fileLocation + "test", this.payloadType + "_file" + this.ssrc, "unv");
 //		try {
 //			initFileHandle();
 //			this.out = new FileOutputStream(fileHandle);
