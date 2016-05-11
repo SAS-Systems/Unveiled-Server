@@ -1,3 +1,18 @@
+/*
+ * Copyright 2016 Sebastian Schmidl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package sas_systems.unveiled.server;
 
 import java.util.Date;
@@ -5,6 +20,7 @@ import java.util.Date;
 /**
  * File POJO class. Represents a database entity.
  * 
+ * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
  */
 public class FilePOJO {
 	
@@ -15,11 +31,11 @@ public class FilePOJO {
 	private String thumbnail_url;
 	private String mediatype;
 	private Date uploaded_at;
-	private int size;
+	private long size;
 	private double lat;
 	private double lng;
 	private boolean isPublic;
-	private boolean isVerfied;
+	private boolean isVerified;
 	private int length;
 	private int heigth;
 	private int width;
@@ -38,14 +54,14 @@ public class FilePOJO {
 	 * @param lat
 	 * @param lng
 	 * @param isPublic
-	 * @param isVerfied
+	 * @param isVerified
 	 * @param length in seconds
 	 * @param heigth
 	 * @param width
 	 * @param resolution eg. 1080, 1440, 2160, 4320
 	 */
 	public FilePOJO(int owner_id, String caption, String filename, String file_url, String thumbnail_url,
-			String mediatype, Date uploaded_at, int size, double lat, double lng, boolean isPublic, boolean isVerfied,
+			String mediatype, Date uploaded_at, long size, double lat, double lng, boolean isPublic, boolean isVerified,
 			int length, int heigth, int width, String resolution) {
 		super();
 		this.owner_id = owner_id;
@@ -59,7 +75,7 @@ public class FilePOJO {
 		this.lat = lat;
 		this.lng = lng;
 		this.isPublic = isPublic;
-		this.isVerfied = isVerfied;
+		this.isVerified = isVerified;
 		this.length = length;
 		this.heigth = heigth;
 		this.width = width;
@@ -108,10 +124,10 @@ public class FilePOJO {
 	public void setUploaded_at(Date uploaded_at) {
 		this.uploaded_at = uploaded_at;
 	}
-	public int getSize() {
+	public long getSize() {
 		return size;
 	}
-	public void setSize(int size) {
+	public void setSize(long size) {
 		this.size = size;
 	}
 	public double getLat() {
@@ -132,11 +148,11 @@ public class FilePOJO {
 	public void setPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
-	public boolean isVerfied() {
-		return isVerfied;
+	public boolean isVerified() {
+		return isVerified;
 	}
-	public void setVerfied(boolean isVerfied) {
-		this.isVerfied = isVerfied;
+	public void setVerified(boolean isVerfied) {
+		this.isVerified = isVerfied;
 	}
 	public int getLength() {
 		return length;

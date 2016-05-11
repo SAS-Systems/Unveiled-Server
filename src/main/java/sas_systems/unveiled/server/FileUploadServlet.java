@@ -15,7 +15,9 @@
  */
 package sas_systems.unveiled.server;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -25,8 +27,13 @@ import javax.servlet.http.HttpServletResponse;
 public class FileUploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -6308606465526504820L;
+	
+	private final String mediaFolder;
 
 	public FileUploadServlet() {
+		this.mediaFolder = PropertiesLoader
+				.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE)
+				.getProperty(PropertiesLoader.SessionProps.REL_PATH_TO_MEDIA);
 	}
 	
 	/**
@@ -36,25 +43,66 @@ public class FileUploadServlet extends HttpServlet {
 		// read parameters:
 		String filename = "undefined";
 		String suffix = "unv";
-		String author = "no_author";
+		int author = -1;
+		String mediatype = "";
+		double lat = .0;
+		double lng = .0;
+		boolean isPublic = false;
+		boolean isVerified = false;
 		if(request.getParameter("filename") != null)
 			filename = request.getParameter("filename");
 		if(request.getParameter("suffix") != null)
 			suffix = request.getParameter("suffix");
-		if(request.getParameter("author") != null)
-			author = request.getParameter("author");
+		if(request.getParameter("author") != null) {
+			try {
+				author = Integer.valueOf(request.getParameter("author"));
+			} catch(NumberFormatException e) {};
+		}
+		if(request.getParameter("mediatype") != null)
+			mediatype = request.getParameter("mediatype");
+		if(request.getParameter("latitude") != null) {
+			try {
+				lat = Double.valueOf(request.getParameter("latitude"));
+			} catch(NumberFormatException e) {};
+		}
+		if(request.getParameter("longitude") != null) {
+			try {
+				lng = Double.valueOf(request.getParameter("longitude"));
+			} catch(NumberFormatException e) {};
+		}
+		if(request.getParameter("public") != null)
+			isPublic = Boolean.parseBoolean(request.getParameter("public"));
+		if(request.getParameter("verified") != null)
+			isVerified = Boolean.parseBoolean(request.getParameter("verified"));
 		
 		// create and write to file
 		final long startTime = System.nanoTime();
-		final String location = getServletContext().getRealPath("/") + "media\\";
-		final FileWriter writer = new FileWriter(author, location, filename, suffix);
+		final String relPath = this.mediaFolder + String.valueOf(author) + "/";
+		final String location = getServletContext().getRealPath("/") + relPath;
+		final FileWriter writer = new FileWriter(location, filename, suffix);
 		writer.writeToFile(request.getInputStream());
-		writer.close();
+		final File fileHanlde = writer.close();
+		
+		// create database entry
+		final String caption = fileHanlde.getName();
+		final String fileUrl = getServletContext().getContextPath() + "/" + relPath + fileHanlde.getName();
+		final String thumbnailUrl = ""; // FIXME generate thumbnail
+		final int length = 0;			// FIXME calculate length [in seconds]
+		final int height = 0;			// FIXME calculate resolution [height]x[width]
+		final int width = 0;
+		final String resolution = height + "x" + width; 
+		FilePOJO fileEntity = new FilePOJO(author, caption, filename, fileUrl, thumbnailUrl, mediatype, 
+				new Date(), fileHanlde.length(), lat, lng, isPublic, isVerified, length, height, width, resolution);
+		// TODO: should be a "global" member to not be created on every request
+		final DatabaseConnector database = new DatabaseConnector();
+		final boolean wasInserted = database.insertFile(fileEntity);
+		database.close();
 				
 		// send result
 		final long endTime = System.nanoTime();
 		final long elapsedTimeNs = endTime - startTime;
 		final double elapsedTimeS = elapsedTimeNs/(1e9);
 		response.getWriter().println(filename + "." + suffix + " from " + author + " was succefully uploaded in " + elapsedTimeS + " seconds!");
+		response.getWriter().println("Status of the database: " + wasInserted + " (was inserted)");
 	}
 }

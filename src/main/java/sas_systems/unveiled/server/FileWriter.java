@@ -23,6 +23,10 @@ import java.io.OutputStream;
 
 import sas_systems.imflux.packet.DataPacket;
 
+/**
+ * 
+ * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
+ */
 public class FileWriter {
 	
 	private static final int BUFFERSIZE = 1024;
@@ -30,9 +34,9 @@ public class FileWriter {
 	private File fileHandle;
 	private OutputStream out;
 
-	public FileWriter(String author, String location, String filename, String suffix) {
+	public FileWriter(String location, String filename, String suffix) {
 		try {
-			initFileHandle(author, location, filename, suffix);
+			initFileHandle(location, filename, suffix);
 			out = new FileOutputStream(fileHandle);
 		} catch(IOException e) {
 			fileHandle = null;
@@ -72,15 +76,11 @@ public class FileWriter {
 		out.flush();
 	}
 
-	public void initFileHandle(String author, String location, String filename, String suffix) throws IOException {
-		// create folders and file
-//		String catalinaHome = System.getenv("CATALINA_HOME"); // FIXME: isnt set -> returns null!
-//		if(catalinaHome == null) 
-//			catalinaHome = "C:/apache-tomcat-7.0.69"; 
-		
-		File folderHandle = new File(location + author);
+	public void initFileHandle(String location, String filename, String suffix) throws IOException {
+		final File folderHandle = new File(location);
 		if(!folderHandle.exists())
 			folderHandle.mkdirs();
+		
 		File fileHandle = new File(folderHandle, filename + "." + suffix);
 		int i = 2;
 		while(!fileHandle.createNewFile()) {
@@ -89,7 +89,7 @@ public class FileWriter {
 		this.fileHandle = fileHandle;
 	}
 	
-	public void close() throws IOException {
+	public File close() throws IOException {
 		if(out != null) {
 			out.flush();
 			out.close();
@@ -100,5 +100,6 @@ public class FileWriter {
 			fileHandle.setWritable(true);
 			fileHandle.setLastModified(System.currentTimeMillis());
 		}
+		return fileHandle;
 	}
 }
