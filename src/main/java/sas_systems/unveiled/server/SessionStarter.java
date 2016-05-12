@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package sas_systems.unveiled.server;
 
 import java.util.Properties;
@@ -86,8 +85,8 @@ public class SessionStarter implements ServletContextListener {
      * @see ServletContextListener#contextDestroyed(ServletContextEvent)
      */
     public void contextDestroyed(ServletContextEvent arg0)  { 
-    	sm.terminateSession();
-    	rtsp.terminate();
+    	if(sm != null) sm.terminateSession();
+    	if(rtsp != null) rtsp.terminate();
     }
 	
 }

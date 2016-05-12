@@ -18,6 +18,7 @@ package sas_systems.unveiled.server;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -29,11 +30,12 @@ public class FileUploadServlet extends HttpServlet {
 	private static final long serialVersionUID = -6308606465526504820L;
 	
 	private final String mediaFolder;
+	private final String urlMediaPath;
 
 	public FileUploadServlet() {
-		this.mediaFolder = PropertiesLoader
-				.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE)
-				.getProperty(PropertiesLoader.SessionProps.REL_PATH_TO_MEDIA);
+		Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
+		this.urlMediaPath = props.getProperty(PropertiesLoader.SessionProps.REL_PATH_TO_MEDIA);
+		this.mediaFolder = props.getProperty(PropertiesLoader.SessionProps.SYSTEM_PATH_TO_MEDIA);
 	}
 	
 	/**
@@ -77,22 +79,22 @@ public class FileUploadServlet extends HttpServlet {
 		
 		// create and write to file
 		final long startTime = System.nanoTime();
-		final String relPath = this.mediaFolder + String.valueOf(author) + "/";
-		final String location = getServletContext().getRealPath("/") + relPath;
+		final String relPath = this.urlMediaPath + String.valueOf(author) + "/";
+		final String location = this.mediaFolder + relPath;
 		final FileWriter writer = new FileWriter(location, filename, suffix);
 		writer.writeToFile(request.getInputStream());
-		final File fileHanlde = writer.close();
+		final File fileHandle = writer.close();
 		
 		// create database entry
-		final String caption = fileHanlde.getName();
-		final String fileUrl = getServletContext().getContextPath() + "/" + relPath + fileHanlde.getName();
+		final String caption = fileHandle.getName();
+		final String fileUrl = "/" + relPath + fileHandle.getName();
 		final String thumbnailUrl = ""; // FIXME generate thumbnail
 		final int length = 0;			// FIXME calculate length [in seconds]
 		final int height = 0;			// FIXME calculate resolution [height]x[width]
 		final int width = 0;
 		final String resolution = height + "x" + width; 
 		FilePOJO fileEntity = new FilePOJO(author, caption, filename, fileUrl, thumbnailUrl, mediatype, 
-				new Date(), fileHanlde.length(), lat, lng, isPublic, isVerified, length, height, width, resolution);
+				new Date(), fileHandle.length(), lat, lng, isPublic, isVerified, length, height, width, resolution);
 		// TODO: should be a "global" member to not be created on every request
 		final DatabaseConnector database = new DatabaseConnector();
 		final boolean wasInserted = database.insertFile(fileEntity);
