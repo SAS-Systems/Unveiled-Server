@@ -59,8 +59,8 @@ public final class PropertiesLoader {
 		public static final String RTP_PORT = "rtp.port";
 		public static final String RTCP_PORT = "rtcp.port";
 		public static final String RTSP_PORT = "rtsp.port";
-		public static final String REL_PATH_TO_MEDIA = "media.location.relPath";
-		public static final String SYSTEM_PATH_TO_MEDIA = "media.location.pathOnSystem";
+		public static final String URL_MEDIA_PATH_PREFIX = "media.location.urlPathPrefix";
+		public static final String SYSTEM_PATH_TO_MEDIA = "media.location.systemPathPrefix";
 	}
 	
 	private static final Map<String, Properties> defaultProperties = new HashMap<>();
@@ -78,8 +78,8 @@ public final class PropertiesLoader {
 		sessionDefault.setProperty(SessionProps.HOST, "localhost");
 		sessionDefault.setProperty(SessionProps.RTCP_PORT, "6983");
 		sessionDefault.setProperty(SessionProps.RTSP_PORT, "1935");
-		sessionDefault.setProperty(SessionProps.REL_PATH_TO_MEDIA, "media/");
-		sessionDefault.setProperty(SessionProps.SYSTEM_PATH_TO_MEDIA, "/");
+		sessionDefault.setProperty(SessionProps.URL_MEDIA_PATH_PREFIX, "media/");
+		sessionDefault.setProperty(SessionProps.SYSTEM_PATH_TO_MEDIA, "media/");
 		defaultProperties.put(SESSIONS_PROPERTIES_FILE, sessionDefault);
 	}
 	

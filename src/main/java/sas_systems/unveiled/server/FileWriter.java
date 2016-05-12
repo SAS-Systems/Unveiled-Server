@@ -47,7 +47,7 @@ public class FileWriter {
 
 	public void writeToFile(InputStream in) throws IOException {
 		if(out == null)
-			throw new IOException("FileOutputStream was not created!");
+			throw new IOException("FileOutputStream could not have been created!");
 		
 		byte[] buffer = new byte[BUFFERSIZE];
 		int readBytes = 0;
@@ -61,11 +61,7 @@ public class FileWriter {
 	}
 	
 	public void writeToFile(DataPacket packet) throws IOException {
-		if(out == null)
-			throw new IOException("FileOutputStream was not created!");
-		
-		out.write(packet.getDataAsArray(), 0, packet.getDataSize());
-		out.flush();
+		writeToFile(packet.getDataAsArray(), 0, packet.getDataSize());
 	}
 	
 	public void writeToFile(byte[] bytes, int offset, int length) throws IOException {

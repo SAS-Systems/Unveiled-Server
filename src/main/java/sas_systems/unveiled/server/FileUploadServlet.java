@@ -30,11 +30,11 @@ public class FileUploadServlet extends HttpServlet {
 	private static final long serialVersionUID = -6308606465526504820L;
 	
 	private final String mediaFolder;
-	private final String urlMediaPath;
+	private final String urlMediaPathPrefix;
 
 	public FileUploadServlet() {
 		Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
-		this.urlMediaPath = props.getProperty(PropertiesLoader.SessionProps.REL_PATH_TO_MEDIA);
+		this.urlMediaPathPrefix = props.getProperty(PropertiesLoader.SessionProps.URL_MEDIA_PATH_PREFIX);
 		this.mediaFolder = props.getProperty(PropertiesLoader.SessionProps.SYSTEM_PATH_TO_MEDIA);
 	}
 	
@@ -79,15 +79,20 @@ public class FileUploadServlet extends HttpServlet {
 		
 		// create and write to file
 		final long startTime = System.nanoTime();
-		final String relPath = this.urlMediaPath + String.valueOf(author) + "/";
-		final String location = this.mediaFolder + relPath;
+		final String location = this.mediaFolder + String.valueOf(author) + "/";
 		final FileWriter writer = new FileWriter(location, filename, suffix);
-		writer.writeToFile(request.getInputStream());
-		final File fileHandle = writer.close();
+		File fileHandle;
+		try {
+			writer.writeToFile(request.getInputStream());
+			fileHandle = writer.close();
+		} catch(IOException e) {
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+			return;
+		}
 		
 		// create database entry
 		final String caption = fileHandle.getName();
-		final String fileUrl = "/" + relPath + fileHandle.getName();
+		final String fileUrl = this.urlMediaPathPrefix + String.valueOf(author) + "/" + fileHandle.getName();
 		final String thumbnailUrl = ""; // FIXME generate thumbnail
 		final int length = 0;			// FIXME calculate length [in seconds]
 		final int height = 0;			// FIXME calculate resolution [height]x[width]
