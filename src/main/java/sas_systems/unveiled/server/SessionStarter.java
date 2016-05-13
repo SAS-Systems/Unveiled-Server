@@ -58,8 +58,8 @@ public class SessionStarter implements ServletContextListener {
     public void contextInitialized(ServletContextEvent arg0)  {
     	LOG.trace("Initializing session...");
     	// set resource location for videos etc
-    	final String rootPath = arg0.getServletContext().getRealPath("/");
-    	sm.setMediaLocation(rootPath + properties.getProperty(PropertiesLoader.SessionProps.REL_PATH_TO_MEDIA));
+//    	final String rootPath = arg0.getServletContext().getRealPath("/");
+    	sm.setMediaLocation(properties.getProperty(PropertiesLoader.SessionProps.SYSTEM_PATH_TO_MEDIA));
     	
     	final String host = properties.getProperty(PropertiesLoader.SessionProps.HOST);
     	final int dataPort = Integer.valueOf(properties.getProperty(PropertiesLoader.SessionProps.RTP_PORT));
