@@ -20,6 +20,7 @@ import java.util.Date;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +31,7 @@ import sas.systems.unveiled.server.util.DatabaseConnector;
 /**
  * Servlet implementation class ConnectionListener
  */
+@WebServlet("/ConnectionSetup")
 public class ConnectionListener extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	

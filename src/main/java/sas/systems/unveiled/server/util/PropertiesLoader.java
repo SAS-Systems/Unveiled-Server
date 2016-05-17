@@ -52,6 +52,8 @@ public final class PropertiesLoader {
 	/**
 	 * Group of session properties access names.
 	 * 
+	 * TODO: implement caching?
+	 * 
 	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
 	 */
 	public static final class SessionProps {
@@ -76,6 +78,7 @@ public final class PropertiesLoader {
 		
 		Properties sessionDefault = new Properties();
 		sessionDefault.setProperty(SessionProps.HOST, "localhost");
+		sessionDefault.setProperty(SessionProps.RTP_PORT, "6982");
 		sessionDefault.setProperty(SessionProps.RTCP_PORT, "6983");
 		sessionDefault.setProperty(SessionProps.RTSP_PORT, "1935");
 		sessionDefault.setProperty(SessionProps.URL_MEDIA_PATH_PREFIX, "media/");
