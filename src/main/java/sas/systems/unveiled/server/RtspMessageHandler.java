@@ -23,4 +23,9 @@ package sas.systems.unveiled.server;
  */
 public class RtspMessageHandler {
 
+	private final SessionManager sm;
+	
+	public RtspMessageHandler(SessionManager sessionManager) {
+		this.sm = sessionManager;
+	}
 }

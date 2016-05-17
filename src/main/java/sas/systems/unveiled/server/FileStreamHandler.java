@@ -21,10 +21,6 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
 
-import javax.ejb.EJB;
-import javax.ejb.Remove;
-import javax.ejb.Stateful;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,31 +39,34 @@ import sas.systems.unveiled.server.util.PropertiesLoader;
  * 
  * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
  */
-@Stateful
 public class FileStreamHandler implements RtpSessionDataListener {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(FileStreamHandler.class);
 	
-	private final int id;;
+	private final int id;
+	private final SessionManager sm;
+	private final DatabaseConnector dbConnection;
+	private final String mediaLocation;
+	private final String mediaUrlPrefix;
+	
 	private long ssrc;
-	private String mediaLocation;
-	private String mediaUrlPrefix;
 	private int author;
 	private String filename;
 	private String suffix;
 	private FileWriter fileWriter;
-	private DatabaseConnector dbConnection;
 	
-	@EJB
-	private SessionManager sm;
+	
 
 	// Constructors ---------------------------------------------------------------------------------------------------
 	/**
-	 * Default constructor for EJB container
+	 * 
 	 */
-	public FileStreamHandler() {
+	public FileStreamHandler(SessionManager sessionManager, DatabaseConnector database) {
+		this.sm = sessionManager;
+		this.dbConnection = database;
 		this.id = new Random().nextInt(100);
-		Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
+		
+		final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
 		this.mediaLocation = props.getProperty(PropertiesLoader.SessionProps.SYSTEM_PATH_TO_MEDIA);
 		this.mediaUrlPrefix = props.getProperty(PropertiesLoader.SessionProps.URL_MEDIA_PATH_PREFIX);
 	}
@@ -88,7 +87,7 @@ public class FileStreamHandler implements RtpSessionDataListener {
 				fileWriter.writeToFile(packet);
 			} catch(IOException e1) {
 				LOG.error("2nd try writing DataPacket to File also failed. Will close FileStream!", e1);
-				remove();
+				finalize();
 			}
 		}
 	}
@@ -103,19 +102,21 @@ public class FileStreamHandler implements RtpSessionDataListener {
 	 * @param filename
 	 * @param suffix (filetype)
 	 */
-	public void init(long ssrc, int author, String filename, String suffix) {
+	public void initialize(long ssrc, int author, String filename, String suffix) {
 		this.ssrc = ssrc;
 		this.author = author;
 		this.filename = filename;
 		this.suffix = suffix;
 		
 		this.fileWriter = new FileWriter(this.mediaLocation + this.author + "/", this.filename, this.suffix);
-		this.dbConnection = new DatabaseConnector();
 		sm.registerListener(this);
 	}
 	
-	@Remove
-	public void remove() {
+	/**
+	 * Tells this handler, that all content was received. Writes the file to the file system and creates the 
+	 * corresponding database entry. Afterwards realeses all used resources
+	 */
+	public void finalize() {
 		sm.unregisterListener(this);
 		try {
 			File fileHandle = fileWriter.close();
@@ -148,8 +149,6 @@ public class FileStreamHandler implements RtpSessionDataListener {
 			LOG.error("File was not completely written!", e);
 			System.err.println("File was not completely written.");
 			e.printStackTrace();
-		} finally {
-			dbConnection.close();
 		}
 	}
 		
