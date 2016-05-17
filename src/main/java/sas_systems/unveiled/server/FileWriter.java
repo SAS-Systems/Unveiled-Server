@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import sas_systems.imflux.packet.DataPacket;
+import sas.systems.imflux.packet.DataPacket;
 
 /**
  * 
