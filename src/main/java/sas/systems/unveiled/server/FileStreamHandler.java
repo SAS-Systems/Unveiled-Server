@@ -32,6 +32,7 @@ import sas.systems.unveiled.server.fileUpload.FilePOJO;
 import sas.systems.unveiled.server.fileUpload.FileWriter;
 import sas.systems.unveiled.server.util.DatabaseConnector;
 import sas.systems.unveiled.server.util.PropertiesLoader;
+import sas.systems.unveiled.server.util.SessionManager;
 
 /**
  * Handler class for retrieving the streamed file content and saving it on the file
@@ -45,10 +46,10 @@ public class FileStreamHandler implements RtpSessionDataListener {
 	
 	private final int id;
 	private final SessionManager sm;
-	private final DatabaseConnector dbConnection;
 	private final String mediaLocation;
 	private final String mediaUrlPrefix;
 	
+	private DatabaseConnector dbConnection;
 	private long ssrc;
 	private int author;
 	private String filename;
@@ -61,9 +62,8 @@ public class FileStreamHandler implements RtpSessionDataListener {
 	/**
 	 * 
 	 */
-	public FileStreamHandler(SessionManager sessionManager, DatabaseConnector database) {
+	public FileStreamHandler(SessionManager sessionManager) {
 		this.sm = sessionManager;
-		this.dbConnection = database;
 		this.id = new Random().nextInt(100);
 		
 		final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
@@ -103,6 +103,7 @@ public class FileStreamHandler implements RtpSessionDataListener {
 	 * @param suffix (filetype)
 	 */
 	public void initialize(long ssrc, int author, String filename, String suffix) {
+		this.dbConnection = new DatabaseConnector();
 		this.ssrc = ssrc;
 		this.author = author;
 		this.filename = filename;
@@ -149,6 +150,8 @@ public class FileStreamHandler implements RtpSessionDataListener {
 			LOG.error("File was not completely written!", e);
 			System.err.println("File was not completely written.");
 			e.printStackTrace();
+		} finally {
+			this.dbConnection.close();
 		}
 	}
 		

@@ -15,8 +15,6 @@
  */
 package sas.systems.unveiled.server;
 
-import java.util.Properties;
-
 import javax.ejb.EJB;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -25,7 +23,7 @@ import javax.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sas.systems.unveiled.server.util.PropertiesLoader;
+import sas.systems.unveiled.server.util.SessionManager;
 
 /**
  * Application Lifecycle Listener implementation class SessionStarter
@@ -39,24 +37,19 @@ public class SessionStarter implements ServletContextListener {
 	
 	@EJB
 	private SessionManager sm;
-	
-	private Properties properties;
 
     /**
      * Default constructor. 
      */
     public SessionStarter() {
-    	// load properties from file containing host name, ports and the media location
-    	this.properties = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
     }
 
 	/**
      * @see ServletContextListener#contextInitialized(ServletContextEvent)
      */
     public void contextInitialized(ServletContextEvent arg0)  {
-    	LOG.trace("Initializing session...");
+    	LOG.debug("----------------------------Initializing session...");
     	// set resource location for videos etc
-    	sm.setMediaLocation(properties.getProperty(PropertiesLoader.SessionProps.SYSTEM_PATH_TO_MEDIA));
     	boolean wasSuccessful = sm.initSessions(SessionManager.PAYLOAD_TYPE_H263);
     	
     	if(!wasSuccessful) {
@@ -64,14 +57,14 @@ public class SessionStarter implements ServletContextListener {
     		throw new IllegalArgumentException("Configuration of RTP or RTSP session was incorrect, so it could not be started.");
     	}
     	
-    	System.out.println("Sessions successfully created and initialized");
+    	LOG.debug("----------------------------Sessions successfully created and initialized");
     }
     
 	/**
      * @see ServletContextListener#contextDestroyed(ServletContextEvent)
      */
     public void contextDestroyed(ServletContextEvent arg0)  { 
-    	if(sm != null) sm.terminateSession();
+    	if(sm != null) sm.terminateSessions();
     }
 	
 }

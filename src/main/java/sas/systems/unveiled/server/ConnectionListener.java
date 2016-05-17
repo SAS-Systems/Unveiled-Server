@@ -16,6 +16,8 @@
 package sas.systems.unveiled.server;
 
 import java.io.IOException;
+import java.io.Writer;
+import java.util.Properties;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -24,17 +26,23 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import sas.systems.unveiled.server.util.PropertiesLoader;
+import sas.systems.unveiled.server.util.SessionManager;
+
 /**
  * Servlet implementation class ConnectionListener
  */
 @WebServlet("/ConnectionSetup")
 public class ConnectionListener extends HttpServlet {
+	
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOG = LoggerFactory.getLogger(ConnectionListener.class);
 	
 	@EJB
 	private SessionManager sm;
-	@EJB
-	private FileStreamHandler stream;
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -47,13 +55,30 @@ public class ConnectionListener extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.getWriter().append("Served at: ").append(request.getContextPath()).append("\n");
-		response.getWriter().append("RTP session is running: ").append(String.valueOf(sm.isRunning())).append("\n");
-		response.getWriter().append("\nsession is running on: ").append(sm.getHost()).append(":")
-				.append(String.valueOf(sm.getDataPort())).append("(data) and ").append(String.valueOf(sm.getHost()))
-				.append(":").append(String.valueOf(sm.getControlPort())).append("(control)").append("\n");
-		response.getWriter().append("FileStream object id: ").append(String.valueOf(stream.getId())).append("\n");
-		response.getWriter().append(getServletContext().getRealPath("/")).append("\n");
+		LOG.info("Response received! (info)");
+		LOG.debug("Debug log");
+		LOG.error("error log");
+		LOG.trace("Trace log");
+		LOG.warn("warn log");
+		final Writer out = response.getWriter();
+		final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
+		final String localPath = props.getProperty(PropertiesLoader.SessionProps.SYSTEM_PATH_TO_MEDIA);
+		final String urlPath = props.getProperty(PropertiesLoader.SessionProps.URL_MEDIA_PATH_PREFIX);
+		
+		// session information
+		out.append("Sessions are running: ").append(String.valueOf(sm.isRunning())).append("\n");
+		out.append("\nRTP session is running on:\t")
+				.append(sm.getHost()).append(":").append(String.valueOf(sm.getDataPort())).append(" (data) and ")
+				.append(sm.getHost()).append(":").append(String.valueOf(sm.getControlPort())).append(" (control)");
+		out.append("\nRTSP session is running on:\t")
+				.append(sm.getHost()).append(":").append(String.valueOf(sm.getSessionControlPort())).append("\n");
+		
+		// media locations:
+		out.append("\nMedia location on server:\t").append(localPath);
+		out.append("\nMedia location served as URL:\t").append(urlPath);
+		
+		out.flush();
+		out.close();
 	}
 
 	/**

@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sas.systems.unveiled.server;
+package sas.systems.unveiled.server.util;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Properties;
 
+import javax.annotation.PreDestroy;
 import javax.ejb.LocalBean;
 import javax.ejb.Singleton;
 
@@ -29,7 +30,7 @@ import sas.systems.imflux.participant.RtpParticipant;
 import sas.systems.imflux.session.rtp.MultiParticipantSession;
 import sas.systems.imflux.session.rtp.RtpSessionDataListener;
 import sas.systems.imflux.session.rtsp.SimpleRtspSession;
-import sas.systems.unveiled.server.util.PropertiesLoader;
+import sas.systems.unveiled.server.RtspMessageHandler;
 
 /**
  * Session Bean implementation class SessionManager.
@@ -38,6 +39,7 @@ import sas.systems.unveiled.server.util.PropertiesLoader;
  */
 @LocalBean
 @Singleton
+//@Startup
 public class SessionManager {
 	
 	public static final int PAYLOAD_TYPE_H263 = 34;
@@ -86,6 +88,16 @@ public class SessionManager {
     	}
     }
     
+//    @PostConstruct
+//    public void postContstruct() {
+//    	initSessions(SessionManager.PAYLOAD_TYPE_H263);
+//    }
+//    
+//    @PreDestroy
+//    public void preDestroy() {
+//    	terminateSessions();
+//    }
+    
     /**
      * Uses the loaded configuration from the properties file to initialize the RTP and RTSP session.
      * 
@@ -104,11 +116,14 @@ public class SessionManager {
 //		rtpSession.addDataListener(new DataHandler(this.payloadType, this.mediaLocation));
 		
 		// create and initialize RTSP session
-		SocketAddress rtspLocalAddress = new InetSocketAddress(host, rtspPort);
+		final RtspMessageHandler rtspHandler = new RtspMessageHandler(this);
+		final SocketAddress rtspLocalAddress = new InetSocketAddress(host, rtspPort);
 		rtspSession = new SimpleRtspSession(this.ID, local, rtspLocalAddress);
 		rtspSession.setUseNio(true);
 		rtspSession.setAutomatedRtspHandling(false);
 //		rtspSession.setOptionsString("");
+		rtspSession.addRequestListener(rtspHandler);
+		rtspSession.addResponseListener(rtspHandler);
 		
     	return (rtpSession.init() && rtspSession.init());
     }
@@ -133,7 +148,8 @@ public class SessionManager {
     	return (rtpSession.isRunning() && rtspSession.isRunning());
     }
     
-    public void terminateSession() {
+	@PreDestroy
+    public void terminateSessions() {
     	if(rtpSession != null) {
     		rtpSession.terminate();
     	}
