@@ -25,8 +25,6 @@ import javax.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sas.systems.imflux.session.rtsp.RtspSession;
-import sas.systems.imflux.session.rtsp.SimpleRtspSession;
 import sas.systems.unveiled.server.util.PropertiesLoader;
 
 /**
@@ -41,7 +39,6 @@ public class SessionStarter implements ServletContextListener {
 	
 	@EJB
 	private SessionManager sm;
-	private RtspSession rtsp;
 	
 	private Properties properties;
 
@@ -59,26 +56,14 @@ public class SessionStarter implements ServletContextListener {
     public void contextInitialized(ServletContextEvent arg0)  {
     	LOG.trace("Initializing session...");
     	// set resource location for videos etc
-//    	final String rootPath = arg0.getServletContext().getRealPath("/");
     	sm.setMediaLocation(properties.getProperty(PropertiesLoader.SessionProps.SYSTEM_PATH_TO_MEDIA));
-    	
-    	final String host = properties.getProperty(PropertiesLoader.SessionProps.HOST);
-    	final int dataPort = Integer.valueOf(properties.getProperty(PropertiesLoader.SessionProps.RTP_PORT));
-    	final int controlPort = Integer.valueOf(properties.getProperty(PropertiesLoader.SessionProps.RTCP_PORT));
-    	
-    	boolean wasSuccessful = sm.initSession(SessionManager.PAYLOAD_TYPE_H263, host, dataPort, controlPort);
+    	boolean wasSuccessful = sm.initSessions(SessionManager.PAYLOAD_TYPE_H263);
     	
     	if(!wasSuccessful) {
-    		LOG.error("Could not initialize RTP session!");
-    		throw new IllegalArgumentException("Configuration of RTP session was incorrect, so it could not be started.");
+    		LOG.error("Could not initialize RTP and RTSP sessions!");
+    		throw new IllegalArgumentException("Configuration of RTP or RTSP session was incorrect, so it could not be started.");
     	}
     	
-    	this.rtsp = new SimpleRtspSession("RTSP session 0", sm.getLocalParticipant());
-    	wasSuccessful = rtsp.init();
-    	if(!wasSuccessful) {
-    		LOG.error("Could not initialize RTSP session!");
-    		throw new IllegalArgumentException("Configuration of RTSP session was incorrect, so it could not be started.");
-    	}
     	System.out.println("Sessions successfully created and initialized");
     }
     
@@ -87,7 +72,6 @@ public class SessionStarter implements ServletContextListener {
      */
     public void contextDestroyed(ServletContextEvent arg0)  { 
     	if(sm != null) sm.terminateSession();
-    	if(rtsp != null) rtsp.terminate();
     }
 	
 }

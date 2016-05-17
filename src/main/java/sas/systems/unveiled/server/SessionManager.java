@@ -15,6 +15,10 @@
  */
 package sas.systems.unveiled.server;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.Properties;
+
 import javax.ejb.LocalBean;
 import javax.ejb.Singleton;
 
@@ -24,9 +28,11 @@ import org.slf4j.LoggerFactory;
 import sas.systems.imflux.participant.RtpParticipant;
 import sas.systems.imflux.session.rtp.MultiParticipantSession;
 import sas.systems.imflux.session.rtp.RtpSessionDataListener;
+import sas.systems.imflux.session.rtsp.SimpleRtspSession;
+import sas.systems.unveiled.server.util.PropertiesLoader;
 
 /**
- * Session Bean implementation class SessionManager
+ * Session Bean implementation class SessionManager.
  * 
  * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
  */
@@ -41,50 +47,70 @@ public class SessionManager {
 	
 	private final String ID = "Unveiled/0";
 	
-	private MultiParticipantSession session;
+	private MultiParticipantSession rtpSession;
+	private SimpleRtspSession rtspSession;
 	private String host;
 	private int dataPort;
 	private int controlPort;
+	private int rtspPort;
 	private int payloadType;
 	
 
     /**
-     * Default constructor. 
+     * Creates a new Session Manager. This method is called from the EJB container, therefore it must be
+     * the default constructor.
      */
     public SessionManager() {
-    }
-    
-    public boolean initSession(int payloadType, String host, int port) {
-    	return initSession(payloadType, host, port, port+1);
-    }
-    
-    public boolean initSession(int payloadType, String host, int dataPort, int controlPort) {
-    	this.host = host;
-    	this.payloadType = payloadType;
+    	// load configuration from file
+    	Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
+    	this.host = props.getProperty(PropertiesLoader.SessionProps.HOST);
+    	try {
+    		this.dataPort = Integer.valueOf(props.getProperty(PropertiesLoader.SessionProps.RTP_PORT));
+    		this.controlPort = Integer.valueOf(props.getProperty(PropertiesLoader.SessionProps.RTCP_PORT));
+    		this.rtspPort = Integer.valueOf(props.getProperty(PropertiesLoader.SessionProps.RTSP_PORT));
+    	} catch(NumberFormatException e) {
+    		LOG.error("Could not load port and host information from {}!", e, PropertiesLoader.SESSIONS_PROPERTIES_FILE);
+    	}
     	
-    	if(dataPort%2 != 0) {
+    	// check port information
+    	if(this.dataPort%2 != 0) {
     		LOG.warn("DataPort was uneven, switching to an even dataPort number to be RFC compliant!");
     		System.out.println("Data port was uneven, switching to an even port number to be RFC compliant!");
-    		dataPort++;
+    		this.dataPort++;
     	}
     	
-    	if(controlPort%2 == 0) {
+    	if(this.controlPort%2 == 0) {
     		LOG.warn("ControlPort was even, switching to an uneven controlPort number to be RFC compliant!");
     		System.out.println("Control port was even, switching to an uneven port number to be RFC compliant!");
-    		controlPort++;
+    		this.controlPort++;
     	}
+    }
+    
+    /**
+     * Uses the loaded configuration from the properties file to initialize the RTP and RTSP session.
+     * 
+     * @param payloadType
+     * @return {@code true} only if both sessions were initialized successfully, {@code false} otherwise  
+     */
+    public boolean initSessions(int payloadType) {
+    	LOG.debug("RTP session will listen on UDP {}:{} and {}:{}", this.host, this.dataPort, this.host, this.controlPort);
+    	LOG.debug("RTSP session will listen on TCP {}:{}", this.host, this.rtspPort);
     	
-    	this.dataPort = dataPort;
-    	this.controlPort = controlPort;
-    	LOG.debug("RTP session will listen on {}:{} and {}:{}", this.host, this.dataPort, this.host, this.controlPort);
-    	System.out.println("RTP session listening on " + this.host + ":" + this.dataPort + " / " + this.host + ":" + this.controlPort);
+    	// create and initialize RTP session
     	RtpParticipant local = RtpParticipant.createReceiver(this.host, this.dataPort, this.controlPort);
-    	session = new MultiParticipantSession(this.ID, this.payloadType, local);
-		session.setUseNio(true);
-		session.setAutomatedRtcpHandling(true);
-		session.addDataListener(new DataHandler(this.payloadType, this.mediaLocation));
+    	rtpSession = new MultiParticipantSession(this.ID, this.payloadType, local);
+		rtpSession.setUseNio(true);
+		rtpSession.setAutomatedRtcpHandling(true);
+//		rtpSession.addDataListener(new DataHandler(this.payloadType, this.mediaLocation));
 		
-    	return session.init();
+		// create and initialize RTSP session
+		SocketAddress rtspLocalAddress = new InetSocketAddress(host, rtspPort);
+		rtspSession = new SimpleRtspSession(this.ID, local, rtspLocalAddress);
+		rtspSession.setUseNio(true);
+		rtspSession.setAutomatedRtspHandling(false);
+//		rtspSession.setOptionsString("");
+		
+    	return (rtpSession.init() && rtspSession.init());
     }
     
     public String getHost() {
@@ -98,23 +124,30 @@ public class SessionManager {
 	public int getControlPort() {
 		return controlPort;
 	}
+	
+	public int getSessionControlPort() {
+		return rtspPort;
+	}
 
 	public boolean isRunning() {
-    	return session.isRunning();
+    	return (rtpSession.isRunning() && rtspSession.isRunning());
     }
     
     public void terminateSession() {
-    	if(session != null) {
-    		session.terminate();
+    	if(rtpSession != null) {
+    		rtpSession.terminate();
+    	}
+    	if(rtspSession != null) {
+    		rtspSession.terminate();
     	}
     }
     
-    public void addDataListener(RtpSessionDataListener listener) {
-    	session.addDataListener(listener);
+    public void registerListener(RtpSessionDataListener listener) {
+    	rtpSession.addDataListener(listener);
     }
     
-    public void removeDataListener(RtpSessionDataListener listener) {
-    	session.removeDataListener(listener);
+    public void unregisterListener(RtpSessionDataListener listener) {
+    	rtpSession.removeDataListener(listener);
     }
 
 	public int getPayloadType() {
@@ -129,7 +162,7 @@ public class SessionManager {
 		this.mediaLocation = resourceLocation;
 	}
 	
-	public RtpParticipant getLocalParticipant() {
-		return this.session.getLocalParticipant();
+	public RtpParticipant getLocalRtpParticipant() {
+		return this.rtpSession.getLocalParticipant();
 	}
 }

@@ -16,7 +16,6 @@
 package sas.systems.unveiled.server;
 
 import java.io.IOException;
-import java.util.Date;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -24,9 +23,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import sas.systems.unveiled.server.fileUpload.FilePOJO;
-import sas.systems.unveiled.server.util.DatabaseConnector;
 
 /**
  * Servlet implementation class ConnectionListener
@@ -38,7 +34,7 @@ public class ConnectionListener extends HttpServlet {
 	@EJB
 	private SessionManager sm;
 	@EJB
-	private FileStream stream;
+	private FileStreamHandler stream;
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -58,10 +54,6 @@ public class ConnectionListener extends HttpServlet {
 				.append(":").append(String.valueOf(sm.getControlPort())).append("(control)").append("\n");
 		response.getWriter().append("FileStream object id: ").append(String.valueOf(stream.getId())).append("\n");
 		response.getWriter().append(getServletContext().getRealPath("/")).append("\n");
-		DatabaseConnector connector = new DatabaseConnector();
-		FilePOJO file = new FilePOJO(1, "testfile", "testfile", "testurl", "testthumbnailurl", "video/mp4", new Date(), 256, 5.6, 10.4, false, true, 23, 860, 240, "860x240");
-//		response.getWriter().append(file + " succesfully inserted: " + connector.insertFile(file));
-		connector.close();
 	}
 
 	/**
