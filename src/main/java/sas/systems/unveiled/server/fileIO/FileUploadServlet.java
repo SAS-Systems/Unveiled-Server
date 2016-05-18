@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sas.systems.unveiled.server.fileUpload;
+package sas.systems.unveiled.server.fileIO;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,22 +35,23 @@ import sas.systems.unveiled.server.util.DatabaseConnector;
 import sas.systems.unveiled.server.util.PropertiesLoader;
 
 @WebServlet("/UploadFile")
-//folder for temp files, threshold for storing files on disk (1MB), max file size (5GB)
+// threshold for storing files on disk (1MB), max file size (5GB)
 @MultipartConfig(fileSizeThreshold=1024*1024, maxFileSize=1024*1024*1024*5)
 public class FileUploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -6308606465526504820L;
 	private static final Logger LOG = LoggerFactory.getLogger(FileUploadServlet.class);
 	
-	public static final String TMP_DIR = System.getProperty("java.io.tmpdir");
-	
 	private final String mediaFolder;
 	private final String urlMediaPathPrefix;
+	private final String urlDefaultThumbnail;
 
 	public FileUploadServlet() {
-		Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
-		this.urlMediaPathPrefix = props.getProperty(PropertiesLoader.SessionProps.URL_MEDIA_PATH_PREFIX);
-		this.mediaFolder = props.getProperty(PropertiesLoader.SessionProps.SYSTEM_PATH_TO_MEDIA);
+		Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.MEDIA_PROPERTIES_FILE);
+		this.urlMediaPathPrefix = props.getProperty(PropertiesLoader.MediaProps.URL_MEDIA_PATH_PREFIX);
+		this.mediaFolder = props.getProperty(PropertiesLoader.MediaProps.SYSTEM_PATH_TO_MEDIA);
+		this.urlDefaultThumbnail = this.urlMediaPathPrefix 
+				+ props.getProperty(PropertiesLoader.MediaProps.REL_PATH_TO_DEFAULT_THUMBNAIL);
 	}
 	
 	/**
@@ -107,7 +108,7 @@ public class FileUploadServlet extends HttpServlet {
 		// create database entry
 		final String caption = fileHandle.getName();
 		final String fileUrl = this.urlMediaPathPrefix + String.valueOf(author) + "/" + fileHandle.getName();
-		final String thumbnailUrl = ""; // FIXME generate thumbnail
+		final String thumbnailUrl = this.urlDefaultThumbnail; // FIXME generate thumbnail
 		final String mediatype = filePart.getContentType();
 		final int length = 0;			// FIXME calculate length [in seconds]
 		final int height = 0;			// FIXME calculate resolution [height]x[width]
@@ -115,7 +116,7 @@ public class FileUploadServlet extends HttpServlet {
 		final String resolution = height + "x" + width; 
 		FilePOJO fileEntity = new FilePOJO(author, caption, filename, fileUrl, thumbnailUrl, mediatype, 
 				new Date(), fileHandle.length(), lat, lng, isPublic, false, length, height, width, resolution);
-		// TODO: should be a "global" member to not be created on every request
+		// TODO: should be a "global" member to not be created on every request?
 		final DatabaseConnector database = new DatabaseConnector();
 		final boolean wasInserted = database.insertFile(fileEntity);
 		

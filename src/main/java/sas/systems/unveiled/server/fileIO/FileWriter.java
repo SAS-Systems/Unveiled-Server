@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sas.systems.unveiled.server.fileUpload;
+package sas.systems.unveiled.server.fileIO;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,7 +36,7 @@ public class FileWriter {
 
 	public FileWriter(String location, String filename, String suffix) {
 		try {
-			initFileHandle(location, filename, suffix);
+			this.fileHandle = initFileHandle(location, filename, suffix);
 			out = new FileOutputStream(fileHandle);
 		} catch(IOException e) {
 			fileHandle = null;
@@ -72,7 +72,7 @@ public class FileWriter {
 		out.flush();
 	}
 
-	public void initFileHandle(String location, String filename, String suffix) throws IOException {
+	public File initFileHandle(String location, String filename, String suffix) throws IOException {
 		final File folderHandle = new File(location);
 		if(!folderHandle.exists())
 			folderHandle.mkdirs();
@@ -82,7 +82,7 @@ public class FileWriter {
 		while(!fileHandle.createNewFile()) {
 			fileHandle = new File(folderHandle, filename + i++ + "." + suffix);
 		}
-		this.fileHandle = fileHandle;
+		return fileHandle;
 	}
 	
 	public File close() throws IOException {

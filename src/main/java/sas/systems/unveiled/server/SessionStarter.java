@@ -15,6 +15,10 @@
  */
 package sas.systems.unveiled.server;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
+
 import javax.ejb.EJB;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -23,6 +27,8 @@ import javax.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import sas.systems.unveiled.server.fileIO.FileWriter;
+import sas.systems.unveiled.server.util.PropertiesLoader;
 import sas.systems.unveiled.server.util.SessionManager;
 
 /**
@@ -47,11 +53,13 @@ public class SessionStarter implements ServletContextListener {
 	/**
      * @see ServletContextListener#contextInitialized(ServletContextEvent)
      */
-    public void contextInitialized(ServletContextEvent arg0)  {
+    public void contextInitialized(ServletContextEvent arg0) {
     	LOG.debug("----------------------------Initializing session...");
-    	// set resource location for videos etc
-    	boolean wasSuccessful = sm.initSessions(SessionManager.PAYLOAD_TYPE_H263);
+    	// copy default thumbnail to servers media folder
+    	generateDefaultThumbnail();
     	
+    	// initialize sessions
+    	boolean wasSuccessful = sm.initSessions(SessionManager.PAYLOAD_TYPE_H263);
     	if(!wasSuccessful) {
     		LOG.error("Could not initialize RTP and RTSP sessions!");
     		throw new IllegalArgumentException("Configuration of RTP or RTSP session was incorrect, so it could not be started.");
@@ -67,4 +75,37 @@ public class SessionStarter implements ServletContextListener {
     	if(sm != null) sm.terminateSessions();
     }
 	
+    private void generateDefaultThumbnail() {
+    	final String defaultFile = "default_thumbnail.jpg";
+    	final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.MEDIA_PROPERTIES_FILE);
+    	final String destination = props.getProperty(PropertiesLoader.MediaProps.SYSTEM_PATH_TO_MEDIA);
+    	String thumbnailFilePath = props.getProperty(PropertiesLoader.MediaProps.REL_PATH_TO_DEFAULT_THUMBNAIL);
+    	
+    	// check existence
+    	final File existingFile = new File(destination + thumbnailFilePath);
+    	if(existingFile.exists()) {
+    		LOG.info("Default Thumbnail was not copied, because it already existed.");
+    		return;
+    	}
+    	
+    	// extract location, filename, suffix
+    	final String fileName = thumbnailFilePath.substring(thumbnailFilePath.lastIndexOf('/')+1, thumbnailFilePath.lastIndexOf('.'));
+    	final String fileSuffix = thumbnailFilePath.substring(thumbnailFilePath.lastIndexOf('.')+1, thumbnailFilePath.length());
+    	thumbnailFilePath = thumbnailFilePath.substring(0, thumbnailFilePath.lastIndexOf('/'));
+    	
+    	// load default file and write to media folder
+    	final ClassLoader classLoader = getClass().getClassLoader();
+    	final FileWriter writer = new FileWriter(destination  + thumbnailFilePath, fileName, fileSuffix);
+    	try {
+    		writer.writeToFile(classLoader.getResourceAsStream(defaultFile));
+    	} catch(IOException e) {
+    		LOG.error("could not copy default thumbnail!", e);
+    	} finally {
+    		try {
+    			writer.close();
+    		} catch (IOException e) {
+    			LOG.error("FATAL ERROR: Unable to close file writer for default thumbnail!", e);
+    		}
+		}
+    }
 }

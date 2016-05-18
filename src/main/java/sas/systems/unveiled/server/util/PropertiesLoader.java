@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
  * Utility class for dealing with properties files. It defines necessary constants (names) 
  * and loads the properties from the files.
  * 
+ * TODO: implement caching?
+ * 
  * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
  */
 public final class PropertiesLoader {
@@ -36,6 +38,7 @@ public final class PropertiesLoader {
 	
 	public static final String DATABASE_PROPERTIES_FILE = "database.properties";
 	public static final String SESSIONS_PROPERTIES_FILE = "sessions.properties";
+	public static final String MEDIA_PROPERTIES_FILE = "media.properties";
 	
 	/**
 	 * Group of database properties access names.
@@ -52,8 +55,6 @@ public final class PropertiesLoader {
 	/**
 	 * Group of session properties access names.
 	 * 
-	 * TODO: implement caching?
-	 * 
 	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
 	 */
 	public static final class SessionProps {
@@ -61,8 +62,17 @@ public final class PropertiesLoader {
 		public static final String RTP_PORT = "rtp.port";
 		public static final String RTCP_PORT = "rtcp.port";
 		public static final String RTSP_PORT = "rtsp.port";
+	}
+	
+	/**
+	 * Group of media properties access names.
+	 * 
+	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
+	 */
+	public static final class MediaProps {
 		public static final String URL_MEDIA_PATH_PREFIX = "media.location.urlPathPrefix";
 		public static final String SYSTEM_PATH_TO_MEDIA = "media.location.systemPathPrefix";
+		public static final String REL_PATH_TO_DEFAULT_THUMBNAIL = "media.default.thumbnail";
 	}
 	
 	private static final Map<String, Properties> defaultProperties = new HashMap<>();
@@ -81,9 +91,13 @@ public final class PropertiesLoader {
 		sessionDefault.setProperty(SessionProps.RTP_PORT, "6982");
 		sessionDefault.setProperty(SessionProps.RTCP_PORT, "6983");
 		sessionDefault.setProperty(SessionProps.RTSP_PORT, "1935");
-		sessionDefault.setProperty(SessionProps.URL_MEDIA_PATH_PREFIX, "media/");
-		sessionDefault.setProperty(SessionProps.SYSTEM_PATH_TO_MEDIA, "media/");
 		defaultProperties.put(SESSIONS_PROPERTIES_FILE, sessionDefault);
+		
+		Properties mediaDefault = new Properties();
+		mediaDefault.setProperty(MediaProps.REL_PATH_TO_DEFAULT_THUMBNAIL, "default/default_thumbnail.jpg");
+		mediaDefault.setProperty(MediaProps.URL_MEDIA_PATH_PREFIX, "media/");
+		mediaDefault.setProperty(MediaProps.SYSTEM_PATH_TO_MEDIA, "media/");
+		defaultProperties.put(MEDIA_PROPERTIES_FILE, mediaDefault);
 	}
 	
 	/**

@@ -28,8 +28,8 @@ import sas.systems.imflux.packet.DataPacket;
 import sas.systems.imflux.participant.RtpParticipantInfo;
 import sas.systems.imflux.session.rtp.RtpSession;
 import sas.systems.imflux.session.rtp.RtpSessionDataListener;
-import sas.systems.unveiled.server.fileUpload.FilePOJO;
-import sas.systems.unveiled.server.fileUpload.FileWriter;
+import sas.systems.unveiled.server.fileIO.FilePOJO;
+import sas.systems.unveiled.server.fileIO.FileWriter;
 import sas.systems.unveiled.server.util.DatabaseConnector;
 import sas.systems.unveiled.server.util.PropertiesLoader;
 import sas.systems.unveiled.server.util.SessionManager;
@@ -66,9 +66,9 @@ public class FileStreamHandler implements RtpSessionDataListener {
 		this.sm = sessionManager;
 		this.id = new Random().nextInt(100);
 		
-		final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
-		this.mediaLocation = props.getProperty(PropertiesLoader.SessionProps.SYSTEM_PATH_TO_MEDIA);
-		this.mediaUrlPrefix = props.getProperty(PropertiesLoader.SessionProps.URL_MEDIA_PATH_PREFIX);
+		final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.MEDIA_PROPERTIES_FILE);
+		this.mediaLocation = props.getProperty(PropertiesLoader.MediaProps.SYSTEM_PATH_TO_MEDIA);
+		this.mediaUrlPrefix = props.getProperty(PropertiesLoader.MediaProps.URL_MEDIA_PATH_PREFIX);
 	}
 	
 	// RtpSessionDataListener -----------------------------------------------------------------------------------------

@@ -61,9 +61,9 @@ public class ConnectionListener extends HttpServlet {
 		LOG.trace("Trace log");
 		LOG.warn("warn log");
 		final Writer out = response.getWriter();
-		final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.SESSIONS_PROPERTIES_FILE);
-		final String localPath = props.getProperty(PropertiesLoader.SessionProps.SYSTEM_PATH_TO_MEDIA);
-		final String urlPath = props.getProperty(PropertiesLoader.SessionProps.URL_MEDIA_PATH_PREFIX);
+		final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.MEDIA_PROPERTIES_FILE);
+		final String localPath = props.getProperty(PropertiesLoader.MediaProps.SYSTEM_PATH_TO_MEDIA);
+		final String urlPath = props.getProperty(PropertiesLoader.MediaProps.URL_MEDIA_PATH_PREFIX);
 		
 		// session information
 		out.append("Sessions are running: ").append(String.valueOf(sm.isRunning())).append("\n");
