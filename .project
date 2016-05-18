@@ -3,6 +3,7 @@
 	<name>Unveiled-Server</name>
 	<comment></comment>
 	<projects>
+		<project>imflux</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

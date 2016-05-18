@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sas_systems.unveiled.server;
+package sas.systems.unveiled.server.fileUpload;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,10 +21,15 @@ import java.util.Date;
 import java.util.Properties;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import sas.systems.unveiled.server.util.DatabaseConnector;
+import sas.systems.unveiled.server.util.PropertiesLoader;
+
+@WebServlet("/UploadFile")
 public class FileUploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -6308606465526504820L;
