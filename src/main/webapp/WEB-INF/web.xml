@@ -5,19 +5,19 @@
       version="3.0"> 
 <!--   <servlet> -->
 <!--     <servlet-name>ConnectionListener</servlet-name> -->
-<!--     <servlet-class>sas_systems.unveiled.server.ConnectionListener</servlet-class> -->
+<!--     <servlet-class>sas.systems.unveiled.server.ConnectionListener</servlet-class> -->
 <!--   </servlet> -->
 <!--   <servlet-mapping> -->
 <!--     <servlet-name>ConnectionListener</servlet-name> -->
 <!--     <url-pattern>/ConnectionSetup</url-pattern> -->
 <!--   </servlet-mapping> -->
   
-  <servlet>
-    <servlet-name>UploadFile</servlet-name>
-    <servlet-class>sas_systems.unveiled.server.FileUploadServlet</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>UploadFile</servlet-name>
-    <url-pattern>/UploadFile</url-pattern>
-  </servlet-mapping>
+<!--   <servlet> -->
+<!--     <servlet-name>UploadFile</servlet-name> -->
+<!--     <servlet-class>sas.systems.unveiled.server.fileUpload.FileUploadServlet</servlet-class> -->
+<!--   </servlet> -->
+<!--   <servlet-mapping> -->
+<!--     <servlet-name>UploadFile</servlet-name> -->
+<!--     <url-pattern>/UploadFile</url-pattern> -->
+<!--   </servlet-mapping> -->
 </web-app>

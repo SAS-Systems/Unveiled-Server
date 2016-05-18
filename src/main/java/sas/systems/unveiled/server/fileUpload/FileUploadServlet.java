@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sas_systems.unveiled.server;
+package sas.systems.unveiled.server.fileUpload;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +22,7 @@ import java.util.Properties;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,7 +31,11 @@ import javax.servlet.http.Part;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// folder for temp files, threshold for storing files on disk (1MB), max file size (5GB)
+import sas.systems.unveiled.server.util.DatabaseConnector;
+import sas.systems.unveiled.server.util.PropertiesLoader;
+
+@WebServlet("/UploadFile")
+//folder for temp files, threshold for storing files on disk (1MB), max file size (5GB)
 @MultipartConfig(fileSizeThreshold=1024*1024, maxFileSize=1024*1024*1024*5)
 public class FileUploadServlet extends HttpServlet {
 
