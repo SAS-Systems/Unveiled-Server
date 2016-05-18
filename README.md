@@ -6,5 +6,7 @@ The following URLs can be used to interact with the Java-Stack of the Unveiled-S
 
 | URL | Method | Paremeters | Description |
 |-----|--------|------------|-------------|
-|`{unveiled.base}/UploadFile` | POST | filename:String,<br/> suffix:String,<br/> author:Int(ID-reference),<br/> mediatype:String(MIME),<br/> latitude:Double,<br/> longitude:Double,<br/> public:Boolean,<br/> verified:Boolean | Is used to upload a file to the server. The content of the file must be send inside the HTTP requests body as bytes.|
+|`{unveiled.base}/UploadFile` | POST | author:Int(ID-reference),<br/> latitude:Double,<br/> longitude:Double,<br/> public:Boolean,<br/> file:&lt;BinaryData&gt; | Is used to upload a file to the server. The parameters and the file content must be send via a multipart body (see screenshot below). |
 ||||
+
+![Postman screenshot of the UploadFile](https://raw.githubusercontent.com/SAS-Systems/Unveiled-Server/master/UploadFilePostman.png)
