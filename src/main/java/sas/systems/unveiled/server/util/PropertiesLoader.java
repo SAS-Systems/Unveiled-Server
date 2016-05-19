@@ -35,48 +35,13 @@ import org.slf4j.LoggerFactory;
 public final class PropertiesLoader {
 
 	private static final Logger LOG = LoggerFactory.getLogger(Properties.class);
-	
+
 	public static final String DATABASE_PROPERTIES_FILE = "database.properties";
 	public static final String SESSIONS_PROPERTIES_FILE = "sessions.properties";
 	public static final String MEDIA_PROPERTIES_FILE = "media.properties";
 	
-	/**
-	 * Group of database properties access names.
-	 * 
-	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
-	 */
-	public static final class DBProps {
-		public static final String DB_HOST = "database.host";
-		public static final String DB_USER = "database.user";
-		public static final String DB_PASSWORD = "database.password";
-		public static final String DB_NAME = "database.name";
-	}
-	
-	/**
-	 * Group of session properties access names.
-	 * 
-	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
-	 */
-	public static final class SessionProps {
-		public static final String HOST = "host";
-		public static final String RTP_PORT = "rtp.port";
-		public static final String RTCP_PORT = "rtcp.port";
-		public static final String RTSP_PORT = "rtsp.port";
-	}
-	
-	/**
-	 * Group of media properties access names.
-	 * 
-	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
-	 */
-	public static final class MediaProps {
-		public static final String URL_MEDIA_PATH_PREFIX = "media.location.urlPathPrefix";
-		public static final String SYSTEM_PATH_TO_MEDIA = "media.location.systemPathPrefix";
-		public static final String REL_PATH_TO_DEFAULT_THUMBNAIL = "media.default.thumbnail";
-	}
-	
 	private static final Map<String, Properties> defaultProperties = new HashMap<>();
-	
+
 	static {
 		// init default properties values:
 		Properties databaseDefault = new Properties();
@@ -85,26 +50,75 @@ public final class PropertiesLoader {
 		databaseDefault.setProperty(DBProps.DB_PASSWORD, "");
 		databaseDefault.setProperty(DBProps.DB_NAME, "unveiled");
 		defaultProperties.put(DATABASE_PROPERTIES_FILE, databaseDefault);
-		
+
 		Properties sessionDefault = new Properties();
 		sessionDefault.setProperty(SessionProps.HOST, "localhost");
 		sessionDefault.setProperty(SessionProps.RTP_PORT, "6982");
 		sessionDefault.setProperty(SessionProps.RTCP_PORT, "6983");
 		sessionDefault.setProperty(SessionProps.RTSP_PORT, "1935");
 		defaultProperties.put(SESSIONS_PROPERTIES_FILE, sessionDefault);
-		
+
 		Properties mediaDefault = new Properties();
 		mediaDefault.setProperty(MediaProps.REL_PATH_TO_DEFAULT_THUMBNAIL, "default/default_thumbnail.jpg");
 		mediaDefault.setProperty(MediaProps.URL_MEDIA_PATH_PREFIX, "media/");
 		mediaDefault.setProperty(MediaProps.SYSTEM_PATH_TO_MEDIA, "media/");
 		defaultProperties.put(MEDIA_PROPERTIES_FILE, mediaDefault);
 	}
-	
+	/**
+	 * Group of database properties access names.
+	 * 
+	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
+	 */
+	public static final class DBProps {
+		/**
+		 * Private constructor to hide implicit public one
+		 */
+		private DBProps(){};
+		
+		public static final String DB_HOST = "database.host";
+		public static final String DB_USER = "database.user";
+		public static final String DB_PASSWORD = "database.password";
+		public static final String DB_NAME = "database.name";
+	}
+
+	/**
+	 * Group of session properties access names.
+	 * 
+	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
+	 */
+	public static final class SessionProps {
+		/**
+		 * Private constructor to hide implicit public one
+		 */
+		private SessionProps(){};
+		
+		public static final String HOST = "host";
+		public static final String RTP_PORT = "rtp.port";
+		public static final String RTCP_PORT = "rtcp.port";
+		public static final String RTSP_PORT = "rtsp.port";
+	}
+
+	/**
+	 * Group of media properties access names.
+	 * 
+	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
+	 */
+	public static final class MediaProps {
+		/**
+		 * Private constructor to hide implicit public one
+		 */
+		private MediaProps(){};
+		
+		public static final String URL_MEDIA_PATH_PREFIX = "media.location.urlPathPrefix";
+		public static final String SYSTEM_PATH_TO_MEDIA = "media.location.systemPathPrefix";
+		public static final String REL_PATH_TO_DEFAULT_THUMBNAIL = "media.default.thumbnail";
+	}
+
 	/**
 	 * Private constructor, because this is just a utils class which should not be instantiated.
 	 */
 	private PropertiesLoader() {};
-	
+
 	/**
 	 * Loads properties from a {@code *.properties}-file in the context classpath.
 	 * 
@@ -114,21 +128,21 @@ public final class PropertiesLoader {
 	 */
 	public static Properties loadPropertiesFile(String fileName) {
 		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-    	final InputStream resource = classLoader.getResourceAsStream(fileName);
-    	final Properties properties = new Properties(defaultProperties.get(fileName));
-    	
-    	try {
-    		if(resource != null) {
-    			properties.load(resource);
-    			LOG.trace("Using properties from file: {}", fileName);
-    			System.out.println("Using properties from file: " + fileName);
-    			return properties;
-    		}
-			
+		final InputStream resource = classLoader.getResourceAsStream(fileName);
+		final Properties properties = new Properties(defaultProperties.get(fileName));
+
+		try {
+			if(resource != null) {
+				properties.load(resource);
+				LOG.trace("Using properties from file: {}", fileName);
+				System.out.println("Using properties from file: " + fileName);
+				return properties;
+			}
+
 		} catch (IOException e) {
 			LOG.error("Could not load {}!", fileName, e);
 			System.out.println("Could not load " + fileName);
 		}
-    	return null;
+		return null;
 	}
 }

@@ -27,7 +27,7 @@ import javax.servlet.annotation.WebListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sas.systems.unveiled.server.fileIO.FileWriter;
+import sas.systems.unveiled.server.fileio.FileWriter;
 import sas.systems.unveiled.server.util.PropertiesLoader;
 import sas.systems.unveiled.server.util.SessionManager;
 
@@ -44,15 +44,10 @@ public class SessionStarter implements ServletContextListener {
 	@EJB
 	private SessionManager sm;
 
-    /**
-     * Default constructor. 
-     */
-    public SessionStarter() {
-    }
-
 	/**
      * @see ServletContextListener#contextInitialized(ServletContextEvent)
      */
+	@Override
     public void contextInitialized(ServletContextEvent arg0) {
     	LOG.debug("----------------------------Initializing session...");
     	// copy default thumbnail to servers media folder
@@ -71,8 +66,10 @@ public class SessionStarter implements ServletContextListener {
 	/**
      * @see ServletContextListener#contextDestroyed(ServletContextEvent)
      */
+	@Override
     public void contextDestroyed(ServletContextEvent arg0)  { 
-    	if(sm != null) sm.terminateSessions();
+    	if(sm != null) 
+    		sm.terminateSessions();
     }
 	
     private void generateDefaultThumbnail() {

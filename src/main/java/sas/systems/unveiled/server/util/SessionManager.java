@@ -15,6 +15,7 @@
  */
 package sas.systems.unveiled.server.util;
 
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Properties;
@@ -40,14 +41,15 @@ import sas.systems.unveiled.server.RtspMessageHandler;
 @LocalBean
 @Singleton
 //@Startup
-public class SessionManager {
+public class SessionManager implements Serializable {
 	
 	public static final int PAYLOAD_TYPE_H263 = 34;
+
+	private static final long serialVersionUID = 7675214072576600736L;
 	private static final Logger LOG = LoggerFactory.getLogger(SessionManager.class);
+	private static final String id = "Unveiled/0";
 	
-	private String mediaLocation;
-	
-	private final String ID = "Unveiled/0";
+	private String mediaLocation;	
 	
 	private MultiParticipantSession rtpSession;
 	private SimpleRtspSession rtspSession;
@@ -77,27 +79,15 @@ public class SessionManager {
     	// check port information
     	if(this.dataPort%2 != 0) {
     		LOG.warn("DataPort was uneven, switching to an even dataPort number to be RFC compliant!");
-    		System.out.println("Data port was uneven, switching to an even port number to be RFC compliant!");
     		this.dataPort++;
     	}
     	
     	if(this.controlPort%2 == 0) {
     		LOG.warn("ControlPort was even, switching to an uneven controlPort number to be RFC compliant!");
-    		System.out.println("Control port was even, switching to an uneven port number to be RFC compliant!");
     		this.controlPort++;
     	}
     }
-    
-//    @PostConstruct
-//    public void postContstruct() {
-//    	initSessions(SessionManager.PAYLOAD_TYPE_H263);
-//    }
-//    
-//    @PreDestroy
-//    public void preDestroy() {
-//    	terminateSessions();
-//    }
-    
+
     /**
      * Uses the loaded configuration from the properties file to initialize the RTP and RTSP session.
      * 
@@ -108,9 +98,11 @@ public class SessionManager {
     	LOG.debug("RTP session will listen on UDP {}:{} and {}:{}", this.host, this.dataPort, this.host, this.controlPort);
     	LOG.debug("RTSP session will listen on TCP {}:{}", this.host, this.rtspPort);
     	
+    	this.payloadType = payloadType;
+    	
     	// create and initialize RTP session
     	RtpParticipant local = RtpParticipant.createReceiver(this.host, this.dataPort, this.controlPort);
-    	rtpSession = new MultiParticipantSession(this.ID, this.payloadType, local);
+    	rtpSession = new MultiParticipantSession(id, this.payloadType, local);
 		rtpSession.setUseNio(true);
 		rtpSession.setAutomatedRtcpHandling(true);
 //		rtpSession.addDataListener(new DataHandler(this.payloadType, this.mediaLocation));
@@ -118,14 +110,13 @@ public class SessionManager {
 		// create and initialize RTSP session
 		final RtspMessageHandler rtspHandler = new RtspMessageHandler(this);
 		final SocketAddress rtspLocalAddress = new InetSocketAddress(host, rtspPort);
-		rtspSession = new SimpleRtspSession(this.ID, local, rtspLocalAddress);
+		rtspSession = new SimpleRtspSession(id, local, rtspLocalAddress);
 		rtspSession.setUseNio(true);
 		rtspSession.setAutomatedRtspHandling(false);
-//		rtspSession.setOptionsString("");
 		rtspSession.addRequestListener(rtspHandler);
 		rtspSession.addResponseListener(rtspHandler);
 		
-    	return (rtpSession.init() && rtspSession.init());
+    	return rtpSession.init() && rtspSession.init();
     }
     
     public String getHost() {
@@ -145,7 +136,7 @@ public class SessionManager {
 	}
 
 	public boolean isRunning() {
-    	return (rtpSession.isRunning() && rtspSession.isRunning());
+    	return rtpSession.isRunning() && rtspSession.isRunning();
     }
     
 	@PreDestroy

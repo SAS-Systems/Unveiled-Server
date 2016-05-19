@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sas.systems.unveiled.server.fileIO;
+package sas.systems.unveiled.server.fileio;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import sas.systems.imflux.packet.DataPacket;
 
@@ -29,6 +32,7 @@ import sas.systems.imflux.packet.DataPacket;
  */
 public class FileWriter {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(FileWriter.class);
 	private static final int BUFFERSIZE = 1024;
 	
 	private File fileHandle;
@@ -41,7 +45,7 @@ public class FileWriter {
 		} catch(IOException e) {
 			fileHandle = null;
 			out = null;
-			System.err.println("Could not initialize file");
+			LOG.error("Could not initialize file", e);
 		}
 	}
 
@@ -50,7 +54,7 @@ public class FileWriter {
 			throw new IOException("FileOutputStream could not have been created!");
 		
 		byte[] buffer = new byte[BUFFERSIZE];
-		int readBytes = 0;
+		int readBytes;
 		
 		// write content
 		while((readBytes = in.read(buffer)) != -1) {
@@ -77,12 +81,12 @@ public class FileWriter {
 		if(!folderHandle.exists())
 			folderHandle.mkdirs();
 		
-		File fileHandle = new File(folderHandle, filename + "." + suffix);
+		File file = new File(folderHandle, filename + "." + suffix);
 		int i = 2;
-		while(!fileHandle.createNewFile()) {
-			fileHandle = new File(folderHandle, filename + i++ + "." + suffix);
+		while(!file.createNewFile()) {
+			file = new File(folderHandle, filename + i++ + "." + suffix);
 		}
-		return fileHandle;
+		return file;
 	}
 	
 	public File close() throws IOException {

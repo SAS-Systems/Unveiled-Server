@@ -54,38 +54,32 @@ public class ConnectionListener extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+    @Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		LOG.info("Response received! (info)");
-		LOG.debug("Debug log");
-		LOG.error("error log");
-		LOG.trace("Trace log");
-		LOG.warn("warn log");
-		final Writer out = response.getWriter();
-		final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.MEDIA_PROPERTIES_FILE);
-		final String localPath = props.getProperty(PropertiesLoader.MediaProps.SYSTEM_PATH_TO_MEDIA);
-		final String urlPath = props.getProperty(PropertiesLoader.MediaProps.URL_MEDIA_PATH_PREFIX);
-		
-		// session information
-		out.append("Sessions are running: ").append(String.valueOf(sm.isRunning())).append("\n");
-		out.append("\nRTP session is running on:\t")
-				.append(sm.getHost()).append(":").append(String.valueOf(sm.getDataPort())).append(" (data) and ")
-				.append(sm.getHost()).append(":").append(String.valueOf(sm.getControlPort())).append(" (control)");
-		out.append("\nRTSP session is running on:\t")
-				.append(sm.getHost()).append(":").append(String.valueOf(sm.getSessionControlPort())).append("\n");
-		
-		// media locations:
-		out.append("\nMedia location on server:\t").append(localPath);
-		out.append("\nMedia location served as URL:\t").append(urlPath);
-		
-		out.flush();
-		out.close();
+		LOG.info("Request received! (info)");
+		try {
+			final Writer out = response.getWriter();
+			final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.MEDIA_PROPERTIES_FILE);
+			final String localPath = props.getProperty(PropertiesLoader.MediaProps.SYSTEM_PATH_TO_MEDIA);
+			final String urlPath = props.getProperty(PropertiesLoader.MediaProps.URL_MEDIA_PATH_PREFIX);
+			
+			// session information
+			out.append("Sessions are running: ").append(String.valueOf(sm.isRunning())).append("\n");
+			out.append("\nRTP session is running on:\t")
+					.append(sm.getHost()).append(":").append(String.valueOf(sm.getDataPort())).append(" (data) and ")
+					.append(sm.getHost()).append(":").append(String.valueOf(sm.getControlPort())).append(" (control)");
+			out.append("\nRTSP session is running on:\t")
+					.append(sm.getHost()).append(":").append(String.valueOf(sm.getSessionControlPort())).append("\n");
+			
+			// media locations:
+			out.append("\nMedia location on server:\t").append(localPath);
+			out.append("\nMedia location served as URL:\t").append(urlPath);
+			
+			out.flush();
+			out.close();
+		} catch(IOException e) {
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+			return;
+		}
 	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-	}
-
 }

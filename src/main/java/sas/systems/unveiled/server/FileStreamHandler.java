@@ -28,8 +28,8 @@ import sas.systems.imflux.packet.DataPacket;
 import sas.systems.imflux.participant.RtpParticipantInfo;
 import sas.systems.imflux.session.rtp.RtpSession;
 import sas.systems.imflux.session.rtp.RtpSessionDataListener;
-import sas.systems.unveiled.server.fileIO.FilePOJO;
-import sas.systems.unveiled.server.fileIO.FileWriter;
+import sas.systems.unveiled.server.fileio.FilePOJO;
+import sas.systems.unveiled.server.fileio.FileWriter;
 import sas.systems.unveiled.server.util.DatabaseConnector;
 import sas.systems.unveiled.server.util.PropertiesLoader;
 import sas.systems.unveiled.server.util.SessionManager;
@@ -87,7 +87,7 @@ public class FileStreamHandler implements RtpSessionDataListener {
 				fileWriter.writeToFile(packet);
 			} catch(IOException e1) {
 				LOG.error("2nd try writing DataPacket to File also failed. Will close FileStream!", e1);
-				finalize();
+				tieUp();
 			}
 		}
 	}
@@ -117,17 +117,17 @@ public class FileStreamHandler implements RtpSessionDataListener {
 	 * Tells this handler, that all content was received. Writes the file to the file system and creates the 
 	 * corresponding database entry. Afterwards realeses all used resources
 	 */
-	public void finalize() {
+	public void tieUp() {
 		sm.unregisterListener(this);
 		try {
 			File fileHandle = fileWriter.close();
 			LOG.debug("{} ({} bytes) was written to filesystem.", fileHandle, fileHandle.length());
 			
 			// store meta information in the database
-			final String mediatype = "";	// FIXME standard value? with mapping suffix -> MIMEtype? 
-			final String thumbnailUrl = ""; // FIXME generate thumbnail
-			final int length = 0;			// FIXME calculate length [in seconds]
-			final int height = 0;			// FIXME calculate resolution [height]x[width]
+			final String mediatype = "";	// TODO standard value? with mapping suffix -> MIMEtype? 
+			final String thumbnailUrl = ""; // TODO generate thumbnail
+			final int length = 0;			// TODO calculate length [in seconds]
+			final int height = 0;			// TODO calculate resolution [height]x[width]
 			final int width = 0;
 			final String resolution = height + "x" + width; 
 			
@@ -148,8 +148,7 @@ public class FileStreamHandler implements RtpSessionDataListener {
 			
 		} catch (IOException e) {
 			LOG.error("File was not completely written!", e);
-			System.err.println("File was not completely written.");
-			e.printStackTrace();
+			System.out.println("File was not completely written.");
 		} finally {
 			this.dbConnection.close();
 		}

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sas.systems.unveiled.server.fileIO;
+package sas.systems.unveiled.server.fileio;
 
 import java.util.Date;
 
@@ -24,13 +24,13 @@ import java.util.Date;
  */
 public class FilePOJO {
 	
-	private int owner_id;
+	private int ownerId;
 	private String caption;
 	private String filename;
-	private String file_url;
-	private String thumbnail_url;
+	private String fileUrl;
+	private String thumbnailUrl;
 	private String mediatype;
-	private Date uploaded_at;
+	private Date uploadedAt;
 	private long size;
 	private double lat;
 	private double lng;
@@ -43,13 +43,13 @@ public class FilePOJO {
 	
 	/**
 	 * 
-	 * @param owner_id foreign key
+	 * @param ownerId foreign key
 	 * @param caption
 	 * @param filename with suffix
-	 * @param file_url absolute
-	 * @param thumbnail_url absolute
+	 * @param fileUrl absolute
+	 * @param thumbnailUrl absolute
 	 * @param mediatype MIME type
-	 * @param uploaded_at Date object -> will be converted in UNIX timestamp (in seconds)
+	 * @param uploadedAt Date object -> will be converted in UNIX timestamp (in seconds)
 	 * @param size byte
 	 * @param lat
 	 * @param lng
@@ -60,17 +60,17 @@ public class FilePOJO {
 	 * @param width
 	 * @param resolution eg. 1080, 1440, 2160, 4320
 	 */
-	public FilePOJO(int owner_id, String caption, String filename, String file_url, String thumbnail_url,
-			String mediatype, Date uploaded_at, long size, double lat, double lng, boolean isPublic, boolean isVerified,
+	public FilePOJO(int ownerId, String caption, String filename, String fileUrl, String thumbnailUrl,
+			String mediatype, Date uploadedAt, long size, double lat, double lng, boolean isPublic, boolean isVerified,
 			int length, int heigth, int width, String resolution) {
 		super();
-		this.owner_id = owner_id;
+		this.ownerId = ownerId;
 		this.caption = caption;
 		this.filename = filename;
-		this.file_url = file_url;
-		this.thumbnail_url = thumbnail_url;
+		this.fileUrl = fileUrl;
+		this.thumbnailUrl = thumbnailUrl;
 		this.mediatype = mediatype;
-		this.uploaded_at = uploaded_at;
+		this.uploadedAt = uploadedAt;
 		this.size = size;
 		this.lat = lat;
 		this.lng = lng;
@@ -82,11 +82,11 @@ public class FilePOJO {
 		this.resolution = resolution;
 	}
 	
-	public int getOwner_id() {
-		return owner_id;
+	public int getOwnerId() {
+		return ownerId;
 	}
-	public void setOwner_id(int owner_id) {
-		this.owner_id = owner_id;
+	public void setOwnerId(int ownerId) {
+		this.ownerId = ownerId;
 	}
 	public String getCaption() {
 		return caption;
@@ -100,17 +100,17 @@ public class FilePOJO {
 	public void setFilename(String filename) {
 		this.filename = filename;
 	}
-	public String getFile_url() {
-		return file_url;
+	public String getFileUrl() {
+		return fileUrl;
 	}
-	public void setFile_url(String file_url) {
-		this.file_url = file_url;
+	public void setFileUrl(String fileUrl) {
+		this.fileUrl = fileUrl;
 	}
-	public String getThumbnail_url() {
-		return thumbnail_url;
+	public String getThumbnailUrl() {
+		return thumbnailUrl;
 	}
-	public void setThumbnail_url(String thumbnail_url) {
-		this.thumbnail_url = thumbnail_url;
+	public void setThumbnailUrl(String thumbnailUrl) {
+		this.thumbnailUrl = thumbnailUrl;
 	}
 	public String getMediatype() {
 		return mediatype;
@@ -118,11 +118,11 @@ public class FilePOJO {
 	public void setMediatype(String mediatype) {
 		this.mediatype = mediatype;
 	}
-	public Date getUploaded_at() {
-		return uploaded_at;
+	public Date getUploadedAt() {
+		return uploadedAt;
 	}
-	public void setUploaded_at(Date uploaded_at) {
-		this.uploaded_at = uploaded_at;
+	public void setUploadedAt(Date uploadedAt) {
+		this.uploadedAt = uploadedAt;
 	}
 	public long getSize() {
 		return size;

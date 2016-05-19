@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sas.systems.unveiled.server.fileIO;
+package sas.systems.unveiled.server.fileio;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,6 +68,7 @@ public class FileUploadServlet extends HttpServlet {
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// check authorization
 		if(!authenticateUserWithToken(request.getHeader("user"), request.getHeader("token"))) {
@@ -76,7 +77,13 @@ public class FileUploadServlet extends HttpServlet {
 		}
 		
 		// get file content
-		final Part filePart = request.getPart("file");
+		Part filePart = null;
+		try{
+			filePart = request.getPart("file");
+		} catch(IOException e) {
+			LOG.error("Could not read file part", e);
+			filePart = null;
+		}
 		if(filePart == null) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "no file found in request (use: parameter 'file' for file content)");
 			return;
@@ -92,17 +99,23 @@ public class FileUploadServlet extends HttpServlet {
 		if(request.getHeader("user") != null) {
 			try {
 				user = Integer.valueOf(request.getHeader("user"));
-			} catch(NumberFormatException e) {};
+			} catch(NumberFormatException e) {
+				LOG.warn("Could not parse parameter: user", e);
+			};
 		}
 		if(request.getParameter("latitude") != null) {
 			try {
 				lat = Double.valueOf(request.getParameter("latitude"));
-			} catch(NumberFormatException e) {};
+			} catch(NumberFormatException e) {
+				LOG.warn("Could not parse parameter: latitude", e);
+			};
 		}
 		if(request.getParameter("longitude") != null) {
 			try {
 				lng = Double.valueOf(request.getParameter("longitude"));
-			} catch(NumberFormatException e) {};
+			} catch(NumberFormatException e) {
+				LOG.warn("Could not parse parameter: longitude", e);
+			};
 		}
 		if(request.getParameter("public") != null)
 			isPublic = Boolean.parseBoolean(request.getParameter("public"));
@@ -118,6 +131,7 @@ public class FileUploadServlet extends HttpServlet {
 			writer.writeToFile(filePart.getInputStream());
 			fileHandle = writer.close();
 		} catch(IOException e) {
+			LOG.error("Error during writing of uploaded file!", e);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
 			return;
 		}
@@ -125,10 +139,10 @@ public class FileUploadServlet extends HttpServlet {
 		// create database entry
 		final String caption = fileHandle.getName();
 		final String fileUrl = this.urlMediaPathPrefix + String.valueOf(user) + "/" + fileHandle.getName();
-		final String thumbnailUrl = this.urlDefaultThumbnail; // FIXME generate thumbnail
+		final String thumbnailUrl = this.urlDefaultThumbnail; // TODO generate thumbnail
 		final String mediatype = filePart.getContentType();
-		final int length = 0;			// FIXME calculate length [in seconds]
-		final int height = 0;			// FIXME calculate resolution [height]x[width]
+		final int length = 0;			// TODO calculate length [in seconds]
+		final int height = 0;			// TODO calculate resolution [height]x[width]
 		final int width = 0;
 		final String resolution = height + "x" + width; 
 		FilePOJO fileEntity = new FilePOJO(user, caption, filename, fileUrl, thumbnailUrl, mediatype, 
@@ -136,14 +150,22 @@ public class FileUploadServlet extends HttpServlet {
 		final boolean wasInserted = this.database.insertFile(fileEntity);
 		
 		// release resources
-		filePart.delete();
+		try {
+			filePart.delete();
+		} catch(IOException e) {
+			LOG.warn("Was not able to delete temporary file!", e);
+		}
 				
 		// send result
 		final long endTime = System.nanoTime();
 		final long elapsedTimeNs = endTime - startTime;
 		final double elapsedTimeS = elapsedTimeNs/(1e9);
-		response.getWriter().println(filename + "." + suffix + " from " + user + " was succefully uploaded in " + elapsedTimeS + " seconds!");
-		response.getWriter().println("Status of the database: " + wasInserted + " (was inserted)");
+		try {
+			response.getWriter().println(filename + "." + suffix + " from " + user + " was succefully uploaded in " + elapsedTimeS + " seconds!");
+			response.getWriter().println("Status of the database: " + wasInserted + " (was inserted)");
+		} catch(IOException e) {
+			LOG.error("No response was send!", e);
+		}
 	}
 	
 	@Override
