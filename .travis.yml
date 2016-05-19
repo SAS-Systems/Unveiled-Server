@@ -18,6 +18,7 @@ jdk:
 branches:
   only:
     - master
+    - deploy
 
 # container-based build:
 sudo: false
@@ -44,8 +45,8 @@ after_success:
 
 #before_deploy:
 
-deploy:
-    - mvn tomcat7:deploy -Ddeploy.url=$DEPLOY_URL -Ddeploy.username=$DEPLOY_USER -Ddeploy.password=$DEPLOY_PASSWORD
+#deploy:
+#    - mvn tomcat7:deploy -Ddeploy.url=$DEPLOY_URL -Ddeploy.username=$DEPLOY_USER -Ddeploy.password=$DEPLOY_PASSWORD
 
 #after_deploy:
 
