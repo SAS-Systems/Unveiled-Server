@@ -32,7 +32,6 @@ sudo: false
 # Unveiled-Server was installed before in this directory: SAS-Systems/Unveiled-Server
 # we install imflux to: SAS-Systems/inmflux (but actually does not matter)
 before_install:
-  - echo "installing imflux"
   - cd ..
   - git clone --depth=50 --branch=master https://github.com/SAS-Systems/imflux.git imflux
   - cd imflux
@@ -40,10 +39,13 @@ before_install:
   - cd ../Unveiled-Server
 
 # build project
-# run test reports and send to coveralls
 script:
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-  - mvn clean test jacoco:report coveralls:report
+  - mvn clean test jacoco:report
+
+# run test reports and send to coveralls
+after_script:
+  - mvn coveralls:report
 
 # analyse code quality with sonarqube and send to server
 after_success:
