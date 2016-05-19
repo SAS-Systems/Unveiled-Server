@@ -1,5 +1,6 @@
 # Unveiled-Server (Java-Stack)
 [![Build Status](https://travis-ci.org/SAS-Systems/Unveiled-Server.svg?branch=master)](https://travis-ci.org/SAS-Systems/Unveiled-Server)
+[![Coverage Status](https://coveralls.io/repos/github/SAS-Systems/Unveiled-Server/badge.svg?branch=master)](https://coveralls.io/github/SAS-Systems/Unveiled-Server?branch=master)
 
 
 ## API Description
