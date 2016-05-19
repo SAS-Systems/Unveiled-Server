@@ -83,15 +83,15 @@ public class FileUploadServlet extends HttpServlet {
 		}
 		// read parameters:
 		String filePartName = "undefined.unv";
-		int author = -1;
+		int user = -1;
 		double lat = .0;
 		double lng = .0;
 		boolean isPublic = false;
 		if(getFileName(filePart) != null)
 			filePartName = getFileName(filePart);
-		if(request.getParameter("author") != null) {
+		if(request.getHeader("user") != null) {
 			try {
-				author = Integer.valueOf(request.getParameter("author"));
+				user = Integer.valueOf(request.getHeader("user"));
 			} catch(NumberFormatException e) {};
 		}
 		if(request.getParameter("latitude") != null) {
@@ -111,7 +111,7 @@ public class FileUploadServlet extends HttpServlet {
 		final String filename = filePartName.substring(0, filePartName.indexOf('.'));
 		final String suffix = filePartName.substring(filePartName.indexOf('.')+1, filePartName.length());
 		final long startTime = System.nanoTime();
-		final String location = this.mediaFolder + String.valueOf(author) + "/";
+		final String location = this.mediaFolder + String.valueOf(user) + "/";
 		final FileWriter writer = new FileWriter(location, filename, suffix);
 		File fileHandle;
 		try {
@@ -124,14 +124,14 @@ public class FileUploadServlet extends HttpServlet {
 		
 		// create database entry
 		final String caption = fileHandle.getName();
-		final String fileUrl = this.urlMediaPathPrefix + String.valueOf(author) + "/" + fileHandle.getName();
+		final String fileUrl = this.urlMediaPathPrefix + String.valueOf(user) + "/" + fileHandle.getName();
 		final String thumbnailUrl = this.urlDefaultThumbnail; // FIXME generate thumbnail
 		final String mediatype = filePart.getContentType();
 		final int length = 0;			// FIXME calculate length [in seconds]
 		final int height = 0;			// FIXME calculate resolution [height]x[width]
 		final int width = 0;
 		final String resolution = height + "x" + width; 
-		FilePOJO fileEntity = new FilePOJO(author, caption, filename, fileUrl, thumbnailUrl, mediatype, 
+		FilePOJO fileEntity = new FilePOJO(user, caption, filename, fileUrl, thumbnailUrl, mediatype, 
 				new Date(), fileHandle.length(), lat, lng, isPublic, false, length, height, width, resolution);
 		final boolean wasInserted = this.database.insertFile(fileEntity);
 		
@@ -142,7 +142,7 @@ public class FileUploadServlet extends HttpServlet {
 		final long endTime = System.nanoTime();
 		final long elapsedTimeNs = endTime - startTime;
 		final double elapsedTimeS = elapsedTimeNs/(1e9);
-		response.getWriter().println(filename + "." + suffix + " from " + author + " was succefully uploaded in " + elapsedTimeS + " seconds!");
+		response.getWriter().println(filename + "." + suffix + " from " + user + " was succefully uploaded in " + elapsedTimeS + " seconds!");
 		response.getWriter().println("Status of the database: " + wasInserted + " (was inserted)");
 	}
 	

@@ -1,0 +1,52 @@
+# configuration file for TravisCI
+
+
+# Notes:
+#  - you can skip a build by adding [ci skip] to the commit message
+#
+
+# see http://about.travis-ci.org/docs/user/languages/java/
+language: java
+
+# test for these JDK versions and environments
+jdk:
+#   - oraclejdk8
+#   - oraclejdk7
+   - openjdk7
+
+# only build these branches (RegEx is also valid, eg. /^deploy.*$/):
+branches:
+  only:
+    - master
+
+# container-based build:
+sudo: false
+
+
+#--------------------------------------------------------------------
+# use default settings:
+#   maven (mvn install -DskipTests=true, mvn test -B)
+#--------------------------------------------------------------------
+
+#before_install:
+#   -
+
+#before_script:
+
+#script:
+
+# run test reports and send to coveralls
+after_success:
+    - mvn clean test jacoco:report coveralls:report
+    - mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL
+
+#after_failure:
+
+#before_deploy:
+
+deploy:
+    - mvn tomcat7:deploy -Ddeploy.url=$DEPLOY_URL -Ddeploy.username=$DEPLOY_USER -Ddeploy.password=$DEPLOY_PASSWORD
+
+#after_deploy:
+
+#after_script:
