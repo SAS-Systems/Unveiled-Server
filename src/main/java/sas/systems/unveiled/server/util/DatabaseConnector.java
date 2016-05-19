@@ -18,6 +18,7 @@ package sas.systems.unveiled.server.util;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
@@ -123,6 +124,33 @@ public class DatabaseConnector {
 			System.out.println("could not write file metadata to database");
 		}
 		return false;
+	}
+	
+	public String getUploadToken(int userId) {
+		final String table = "user";
+		final StringBuilder sql = new StringBuilder();
+		
+		sql.append("SELECT id, upload_token ")
+			.append("FROM ")
+			.append(this.databaseName).append(".").append(table).append(" ")
+			.append("WHERE ")
+			.append("id=?");
+		
+		try {
+			final PreparedStatement stmt = this.conn.prepareStatement(sql.toString());
+			// append parameters
+			stmt.setInt(1, userId);
+			// execute
+			final ResultSet result = stmt.executeQuery();
+			if(result.next()) {
+				return result.getString("upload_token");
+			}
+			result.close();
+		} catch(SQLException e) {
+			LOG.error("could not read token form user " + userId + " from the database", e);
+			System.out.println("could not read token form user " + userId + " from the database");
+		}
+		return null;
 	}
 
 	public void close() {

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -45,6 +46,8 @@ public class FileUploadServlet extends HttpServlet {
 	private final String mediaFolder;
 	private final String urlMediaPathPrefix;
 	private final String urlDefaultThumbnail;
+	
+	private DatabaseConnector database;
 
 	public FileUploadServlet() {
 		Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.MEDIA_PROPERTIES_FILE);
@@ -54,10 +57,24 @@ public class FileUploadServlet extends HttpServlet {
 				+ props.getProperty(PropertiesLoader.MediaProps.REL_PATH_TO_DEFAULT_THUMBNAIL);
 	}
 	
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		
+		// create database connection
+		this.database = new DatabaseConnector();
+	}
+	
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// check authorization
+		if(!authenticateUserWithToken(request.getHeader("user"), request.getHeader("token"))) {
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "token is invalid or not given");
+			return;
+		}
+		
 		// get file content
 		final Part filePart = request.getPart("file");
 		if(filePart == null) {
@@ -116,12 +133,9 @@ public class FileUploadServlet extends HttpServlet {
 		final String resolution = height + "x" + width; 
 		FilePOJO fileEntity = new FilePOJO(author, caption, filename, fileUrl, thumbnailUrl, mediatype, 
 				new Date(), fileHandle.length(), lat, lng, isPublic, false, length, height, width, resolution);
-		// TODO: should be a "global" member to not be created on every request?
-		final DatabaseConnector database = new DatabaseConnector();
-		final boolean wasInserted = database.insertFile(fileEntity);
+		final boolean wasInserted = this.database.insertFile(fileEntity);
 		
 		// release resources
-		database.close();
 		filePart.delete();
 				
 		// send result
@@ -130,6 +144,14 @@ public class FileUploadServlet extends HttpServlet {
 		final double elapsedTimeS = elapsedTimeNs/(1e9);
 		response.getWriter().println(filename + "." + suffix + " from " + author + " was succefully uploaded in " + elapsedTimeS + " seconds!");
 		response.getWriter().println("Status of the database: " + wasInserted + " (was inserted)");
+	}
+	
+	@Override
+	public void destroy() {
+		super.destroy();
+		
+		// close database connection
+		this.database.close();
 	}
 	
 	private String getFileName(final Part part) {
@@ -142,5 +164,19 @@ public class FileUploadServlet extends HttpServlet {
 	        }
 	    }
 	    return null;
+	}
+	
+	private boolean authenticateUserWithToken(String user, String token) {
+		int userId = 0;
+		try {
+			userId = Integer.valueOf(user);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		final String realToken = this.database.getUploadToken(userId);
+		if(realToken == null) {
+			return false;
+		}
+		return realToken.equals(token);
 	}
 }
