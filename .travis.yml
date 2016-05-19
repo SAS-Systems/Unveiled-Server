@@ -28,8 +28,10 @@ sudo: false
 #   maven (mvn install -DskipTests=true, mvn test -B)
 #--------------------------------------------------------------------
 
+#before_install
+
 # install imflux.jar (our own streaming library)
-after_install:
+before_script:
   # Unveiled-Server was installed before in this directory: SAS-Systems/Unveiled-Server
   # we install imflux to: SAS-Systems/inmflux (but actually does not matter)
   - cd ..
@@ -37,8 +39,6 @@ after_install:
   - cd imflux
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B
   - cd ../Unveiled-Server
-
-#before_script:
 
 script:
   # build project
