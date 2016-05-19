@@ -30,9 +30,12 @@ sudo: false
 #--------------------------------------------------------------------
 
 #before_install:
-#   -
 
-#before_script:
+
+before_script:
+   - git clone --branch=master https://github.com/SAS-Systems/imflux.git SAS-Systems/imflux
+   - cd SAS-Systems/imflux
+   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B
 
 #script:
 
