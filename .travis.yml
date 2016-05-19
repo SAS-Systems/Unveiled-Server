@@ -34,7 +34,7 @@ sudo: false
 before_install:
   - echo "installing imflux"
   - cd ..
-  - git clone --depth=50 --branch=master https://github.com/SAS-Systems/imflux.git SAS-Systems/imflux
+  - git clone --depth=50 --branch=master https://github.com/SAS-Systems/imflux.git imflux
   - cd imflux
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B
   - cd ../Unveiled-Server
