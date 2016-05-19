@@ -44,12 +44,12 @@ script:
   - mvn clean test jacoco:report
 
 # run test reports and send to coveralls
-after_script:
-  - mvn coveralls:report
-
 # analyse code quality with sonarqube and send to server
+# finally deploy Unveiled-Server.war to our server
 after_success:
+  - mvn coveralls:report
   - mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL
+  - mvn tomcat7:deploy -Ddeploy.url=$DEPLOY_URL -Ddeploy.username=$DEPLOY_USER -Ddeploy.password=$DEPLOY_PASSWORD
 
 #after_failure:
 
@@ -60,11 +60,9 @@ after_success:
 # deployment
 #--------------------------------------------------------------------
 
-deploy:
-  skip_cleanup: true
+#deploy:
+#  skip_cleanup: true
 
 #after_deploy:
 
-# finally deploy Unveiled-Server.war to our server
 #after_script:
-#  - mvn tomcat7:deploy -Ddeploy.url=$DEPLOY_URL -Ddeploy.username=$DEPLOY_USER -Ddeploy.password=$DEPLOY_PASSWORD
