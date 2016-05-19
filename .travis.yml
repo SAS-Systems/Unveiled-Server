@@ -29,15 +29,17 @@ sudo: false
 #   maven (mvn install -DskipTests=true, mvn test -B)
 #--------------------------------------------------------------------
 
-#before_install:
-
-
-before_script:
+before_install:
    - git clone --branch=master https://github.com/SAS-Systems/imflux.git SAS-Systems/imflux
    - cd SAS-Systems/imflux
    - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B
+   - cd ../..
 
-#script:
+#before_script:
+
+script:
+   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+   - mvn test -B
 
 # run test reports and send to coveralls
 after_success:
