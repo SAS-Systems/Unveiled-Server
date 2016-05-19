@@ -24,26 +24,26 @@ sudo: false
 
 
 #--------------------------------------------------------------------
-# use default settings:
-#   maven (mvn install -DskipTests=true, mvn test -B)
+# script:
+# install, bulid, test, ...
 #--------------------------------------------------------------------
 
 #before_install
 
 # install imflux.jar (our own streaming library)
+# Unveiled-Server was installed before in this directory: SAS-Systems/Unveiled-Server
+# we install imflux to: SAS-Systems/inmflux (but actually does not matter)
 before_script:
-  # Unveiled-Server was installed before in this directory: SAS-Systems/Unveiled-Server
-  # we install imflux to: SAS-Systems/inmflux (but actually does not matter)
   - cd ..
-  - git clone --branch=master https://github.com/SAS-Systems/imflux.git SAS-Systems/imflux
+  - git clone --depth=50 --branch=master https://github.com/SAS-Systems/imflux.git SAS-Systems/imflux
   - cd imflux
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B
   - cd ../Unveiled-Server
 
+# build project
+# run test reports and send to coveralls
 script:
-  # build project
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-  # run test reports and send to coveralls
   - mvn clean test jacoco:report coveralls:report
 
 # analyse code quality with sonarqube and send to server
@@ -54,11 +54,16 @@ after_success:
 
 #before_deploy:
 
+
+#--------------------------------------------------------------------
+# deployment
+#--------------------------------------------------------------------
+
 deploy:
   skip_cleanup: true
 
 #after_deploy:
 
 # finally deploy Unveiled-Server.war to our server
-after_script:
-  - mvn tomcat7:deploy -Ddeploy.url=$DEPLOY_URL -Ddeploy.username=$DEPLOY_USER -Ddeploy.password=$DEPLOY_PASSWORD
+#after_script:
+#  - mvn tomcat7:deploy -Ddeploy.url=$DEPLOY_URL -Ddeploy.username=$DEPLOY_USER -Ddeploy.password=$DEPLOY_PASSWORD
