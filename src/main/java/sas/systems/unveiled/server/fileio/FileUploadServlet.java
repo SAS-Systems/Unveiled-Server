@@ -35,6 +35,13 @@ import org.slf4j.LoggerFactory;
 import sas.systems.unveiled.server.util.DatabaseConnector;
 import sas.systems.unveiled.server.util.PropertiesLoader;
 
+/**
+ * File upload servlet. It receives a POST request with the file content and the parameters
+ * in the multipart body. The file is stored on the disk and a corresponding database entry
+ * is stored in the database.
+ * 
+ * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
+ */
 @WebServlet("/UploadFile")
 // threshold for storing files on disk (1MB), max file size (5GB)
 @MultipartConfig(fileSizeThreshold=1024*1024, maxFileSize=1024*1024*1024*5)
@@ -57,6 +64,9 @@ public class FileUploadServlet extends HttpServlet {
 				+ props.getProperty(PropertiesLoader.MediaProps.REL_PATH_TO_DEFAULT_THUMBNAIL);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
@@ -76,60 +86,20 @@ public class FileUploadServlet extends HttpServlet {
 			return;
 		}
 		
-		// get file content
-		Part filePart = null;
-		try{
-			filePart = request.getPart("file");
-		} catch(IOException e) {
-			LOG.error("Could not read file part", e);
-			filePart = null;
-		}
-		if(filePart == null) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "no file found in request (use: parameter 'file' for file content)");
+		// read parameters:
+		FileParameters params;
+		try {
+			params = readRequest(request);
+		} catch(BadRequestException e) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 			return;
 		}
-		// read parameters:
-		String filePartName = "undefined.unv";
-		int user = -1;
-		double lat = .0;
-		double lng = .0;
-		boolean isPublic = false;
-		if(getFileName(filePart) != null)
-			filePartName = getFileName(filePart);
-		if(request.getHeader("user") != null) {
-			try {
-				user = Integer.valueOf(request.getHeader("user"));
-			} catch(NumberFormatException e) {
-				LOG.warn("Could not parse parameter: user", e);
-			};
-		}
-		if(request.getParameter("latitude") != null) {
-			try {
-				lat = Double.valueOf(request.getParameter("latitude"));
-			} catch(NumberFormatException e) {
-				LOG.warn("Could not parse parameter: latitude", e);
-			};
-		}
-		if(request.getParameter("longitude") != null) {
-			try {
-				lng = Double.valueOf(request.getParameter("longitude"));
-			} catch(NumberFormatException e) {
-				LOG.warn("Could not parse parameter: longitude", e);
-			};
-		}
-		if(request.getParameter("public") != null)
-			isPublic = Boolean.parseBoolean(request.getParameter("public"));
 		
 		// create and write to file
-		final String filename = filePartName.substring(0, filePartName.indexOf('.'));
-		final String suffix = filePartName.substring(filePartName.indexOf('.')+1, filePartName.length());
 		final long startTime = System.nanoTime();
-		final String location = this.mediaFolder + String.valueOf(user) + "/";
-		final FileWriter writer = new FileWriter(location, filename, suffix);
 		File fileHandle;
 		try {
-			writer.writeToFile(filePart.getInputStream());
-			fileHandle = writer.close();
+			fileHandle = writeFile(params);
 		} catch(IOException e) {
 			LOG.error("Error during writing of uploaded file!", e);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
@@ -137,21 +107,11 @@ public class FileUploadServlet extends HttpServlet {
 		}
 		
 		// create database entry
-		final String caption = fileHandle.getName();
-		final String fileUrl = this.urlMediaPathPrefix + String.valueOf(user) + "/" + fileHandle.getName();
-		final String thumbnailUrl = this.urlDefaultThumbnail; // TODO generate thumbnail
-		final String mediatype = filePart.getContentType();
-		final int length = 0;			// TODO calculate length [in seconds]
-		final int height = 0;			// TODO calculate resolution [height]x[width]
-		final int width = 0;
-		final String resolution = height + "x" + width; 
-		FilePOJO fileEntity = new FilePOJO(user, caption, filename, fileUrl, thumbnailUrl, mediatype, 
-				new Date(), fileHandle.length(), lat, lng, isPublic, false, length, height, width, resolution);
-		final boolean wasInserted = this.database.insertFile(fileEntity);
+		final boolean wasInserted = createDbEntry(params, fileHandle);
 		
 		// release resources
 		try {
-			filePart.delete();
+			params.getFile().delete();
 		} catch(IOException e) {
 			LOG.warn("Was not able to delete temporary file!", e);
 		}
@@ -161,13 +121,16 @@ public class FileUploadServlet extends HttpServlet {
 		final long elapsedTimeNs = endTime - startTime;
 		final double elapsedTimeS = elapsedTimeNs/(1e9);
 		try {
-			response.getWriter().println(filename + "." + suffix + " from " + user + " was succefully uploaded in " + elapsedTimeS + " seconds!");
+			response.getWriter().println(params.getFileName() + " from " + params.getUser() + " was succefully uploaded in " + elapsedTimeS + " seconds!");
 			response.getWriter().println("Status of the database: " + wasInserted + " (was inserted)");
 		} catch(IOException e) {
 			LOG.error("No response was send!", e);
 		}
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void destroy() {
 		super.destroy();
@@ -176,18 +139,87 @@ public class FileUploadServlet extends HttpServlet {
 		this.database.close();
 	}
 	
-	private String getFileName(final Part part) {
-	    final String partHeader = part.getHeader("content-disposition");
-	    LOG.info("Part Header = {}", partHeader);
-	    for (String content : part.getHeader("content-disposition").split(";")) {
-	        if (content.trim().startsWith("filename")) {
-	            return content.substring(
-	                    content.indexOf('=') + 1).trim().replace("\"", "");
-	        }
-	    }
-	    return null;
+	/**
+	 * Creates the corresponding database entry to the uploaded file.
+	 * 
+	 * @param params
+	 * @param fileHandle
+	 * @return {@code true} if the record was successfully inserted, {@code false} otherwise
+	 */
+	private boolean createDbEntry(FileParameters params, File fileHandle) {
+		final String caption = params.getFile().getName();
+		final String fileUrl = this.urlMediaPathPrefix + String.valueOf(params.getUser()) + "/" + caption;
+		final String thumbnailUrl = this.urlDefaultThumbnail; // TODO generate thumbnail
+		final String mediatype = params.getFile().getContentType();
+		final int length = 0;			// TODO calculate length [in seconds]
+		final int height = 0;			// TODO calculate resolution [height]x[width]
+		final int width = 0;
+		final String resolution = height + "x" + width; 
+		FilePOJO fileEntity = new FilePOJO(params.getUser(), caption, params.getFileName(), fileUrl, thumbnailUrl, mediatype, 
+				new Date(), fileHandle.length(), params.getLatitude(), params.getLongitude(), params.getPublic(), false, length, height, width, resolution);
+		
+		return this.database.insertFile(fileEntity);
+	}
+
+	/**
+	 * Saves the uploaded file on the disk.
+	 * 
+	 * @param params
+	 * @return the file handle to get some file metadata
+	 * @throws IOException
+	 */
+	private File writeFile(FileParameters params) throws IOException {
+		// build folder and file descriptions
+		final String filePartName = params.getFileName();
+		final String filename = filePartName.substring(0, filePartName.indexOf('.'));
+		final String suffix = filePartName.substring(filePartName.indexOf('.')+1, filePartName.length());
+		final String location = this.mediaFolder + String.valueOf(params.getUser()) + "/";
+		// write file
+		final FileWriter writer = new FileWriter(location, filename, suffix);
+		writer.writeToFile(params.getFile().getInputStream());
+		
+		return writer.close();
 	}
 	
+	/**
+	 * Parses the request and extracts the file part and all required parameters.
+	 * 
+	 * @param request
+	 * @return the parsed request enclosed in a {@link FileParameters} object.
+	 * @throws BadRequestException
+	 */
+	private FileParameters readRequest(HttpServletRequest request) throws BadRequestException {
+		Part filePart = null;
+		
+		// get file content
+		try{
+			filePart = request.getPart("file");
+		} catch(IOException | ServletException e) {
+			LOG.error("Could not read file part", e);
+			filePart = null;
+		}
+		if(filePart == null) {
+			throw new BadRequestException("no file found in request (use: parameter 'file' for file content)");
+		}
+		
+		// get parameters
+		final FileParameters fileParameters = new FileParameters(filePart);
+		fileParameters.setUser(getIntSilently(request.getHeader("user")));
+		fileParameters.setLatitude(getDoubleSilently(request.getParameter("latitude")));
+		fileParameters.setLongitude(getDoubleSilently(request.getParameter("longitude")));
+		fileParameters.setPublic(getBooleanSilently(request.getParameter("public")));
+		
+		// return result
+		return fileParameters;
+	}
+	
+	/**
+	 * Checks whether the request is a valid request or not using the provided user and token headers.
+	 * 
+	 * @param user
+	 * @param token
+	 * @return {@code true} if authentication was successful, {@code false} otherwise
+	 */
 	private boolean authenticateUserWithToken(String user, String token) {
 		int userId = 0;
 		try {
@@ -200,5 +232,66 @@ public class FileUploadServlet extends HttpServlet {
 			return false;
 		}
 		return realToken.equals(token);
+	}
+	
+	/**
+	 * Silently parsing the value to a double.
+	 * 
+	 * @param value
+	 * @return default: {@code 0.0}
+	 */
+	private double getDoubleSilently(String value) {
+		if(value != null) {
+			try {
+				return Double.valueOf(value);
+			} catch(NumberFormatException e) {
+				LOG.warn("Could not parse parameter: longitude", e);
+			}
+		}
+		return .0;
+	}
+	
+	/**
+	 * Silently parsing the value to an integer.
+	 * 
+	 * @param value
+	 * @return default: {@code 0}
+	 */
+	private int getIntSilently(String value) {
+		if(value != null) {
+			try {
+				return Integer.valueOf(value);
+			} catch(NumberFormatException e) {
+				LOG.warn("Could not parse parameter: longitude", e);
+			}
+		}
+		return 0;
+	}
+	
+	/**
+	 * Silently parsing the value into a boolean.
+	 * 
+	 * @param value
+	 * @return default {@code false} and if successful the parsed value
+	 */
+	private boolean getBooleanSilently(String value) {
+		if(value != null)
+			return Boolean.parseBoolean(value);
+		
+		return false;
+	}
+	
+	/**
+	 * Exception class for the parameter parsing method ({@link FileUploadServlet#readRequest(HttpServletRequest)}.
+	 * 
+	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
+	 */
+	private class BadRequestException extends Exception {
+		
+		private static final long serialVersionUID = 1802835677175282599L;
+
+		public BadRequestException(String string) {
+			super(string);
+		}
 	}
 }
