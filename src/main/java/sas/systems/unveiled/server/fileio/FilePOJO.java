@@ -28,12 +28,9 @@ public class FilePOJO {
 	private String thumbnailUrl;
 	private FileLocation location;
 	private FileMetadata metadata;
+	private FileMediaData mediadata;
 	private boolean isPublic;
 	private boolean isVerified;
-	private int length;
-	private int heigth;
-	private int width;
-	private String resolution;
 	
 	/**
 	 * 
@@ -45,14 +42,9 @@ public class FilePOJO {
 	 * @param metadata
 	 * @param isPublic
 	 * @param isVerified
-	 * @param length in seconds
-	 * @param heigth
-	 * @param width
-	 * @param resolution eg. 1080, 1440, 2160, 4320
 	 */
 	public FilePOJO(int ownerId, String filename, String fileUrl, String thumbnailUrl,
-			FileLocation location, FileMetadata metadata, boolean isPublic, boolean isVerified,
-			int length, int heigth, int width, String resolution) {
+			FileLocation location, FileMetadata metadata, FileMediaData mediadata, boolean isPublic, boolean isVerified) {
 		super();
 		this.ownerId = ownerId;
 		this.filename = filename;
@@ -62,10 +54,7 @@ public class FilePOJO {
 		this.metadata = metadata;
 		this.isPublic = isPublic;
 		this.isVerified = isVerified;
-		this.length = length;
-		this.heigth = heigth;
-		this.width = width;
-		this.resolution = resolution;
+		this.mediadata = mediadata;
 	}
 	
 	public int getOwnerId() {
@@ -104,29 +93,22 @@ public class FilePOJO {
 	public void setVerified(boolean isVerfied) {
 		this.isVerified = isVerfied;
 	}
-	public int getLength() {
-		return length;
+	public FileLocation getLocation() {
+		return location;
 	}
-	public void setLength(int length) {
-		this.length = length;
+	public void setLocation(FileLocation location) {
+		this.location = location;
 	}
-	public int getHeigth() {
-		return heigth;
+	public FileMetadata getMetadata() {
+		return metadata;
 	}
-	public void setHeigth(int heigth) {
-		this.heigth = heigth;
+	public void setMetadata(FileMetadata metadata) {
+		this.metadata = metadata;
 	}
-	public int getWidth() {
-		return width;
+	public FileMediaData getMediadata() {
+		return mediadata;
 	}
-	public void setWidth(int width) {
-		this.width = width;
+	public void setMediadata(FileMediaData mediadata) {
+		this.mediadata = mediadata;
 	}
-	public String getResolution() {
-		return resolution;
-	}
-	public void setResolution(String resolution) {
-		this.resolution = resolution;
-	}
-
 }
