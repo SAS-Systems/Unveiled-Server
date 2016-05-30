@@ -32,8 +32,7 @@ public class FilePOJO {
 	private String mediatype;
 	private Date uploadedAt;
 	private long size;
-	private double lat;
-	private double lng;
+	private Location location;
 	private boolean isPublic;
 	private boolean isVerified;
 	private int length;
@@ -51,8 +50,7 @@ public class FilePOJO {
 	 * @param mediatype MIME type
 	 * @param uploadedAt Date object -> will be converted in UNIX timestamp (in seconds)
 	 * @param size byte
-	 * @param lat
-	 * @param lng
+	 * @param location
 	 * @param isPublic
 	 * @param isVerified
 	 * @param length in seconds
@@ -61,7 +59,7 @@ public class FilePOJO {
 	 * @param resolution eg. 1080, 1440, 2160, 4320
 	 */
 	public FilePOJO(int ownerId, String caption, String filename, String fileUrl, String thumbnailUrl,
-			String mediatype, Date uploadedAt, long size, double lat, double lng, boolean isPublic, boolean isVerified,
+			String mediatype, Date uploadedAt, long size, Location location, boolean isPublic, boolean isVerified,
 			int length, int heigth, int width, String resolution) {
 		super();
 		this.ownerId = ownerId;
@@ -72,8 +70,7 @@ public class FilePOJO {
 		this.mediatype = mediatype;
 		this.uploadedAt = uploadedAt;
 		this.size = size;
-		this.lat = lat;
-		this.lng = lng;
+		this.location = location;
 		this.isPublic = isPublic;
 		this.isVerified = isVerified;
 		this.length = length;
@@ -129,18 +126,6 @@ public class FilePOJO {
 	}
 	public void setSize(long size) {
 		this.size = size;
-	}
-	public double getLat() {
-		return lat;
-	}
-	public void setLat(double lat) {
-		this.lat = lat;
-	}
-	public double getLng() {
-		return lng;
-	}
-	public void setLng(double lng) {
-		this.lng = lng;
 	}
 	public boolean isPublic() {
 		return isPublic;
