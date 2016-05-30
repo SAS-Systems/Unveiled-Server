@@ -40,9 +40,8 @@ before_install:
 
 # build project
 script:
-  - false
-#  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-#  - mvn clean test jacoco:report
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - mvn clean test jacoco:report
 
 # run test reports and send to coveralls
 # analyse code quality with sonarqube and send to server
