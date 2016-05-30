@@ -51,14 +51,10 @@ after_success:
   - mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL
   - mvn tomcat7:deploy -Ddeploy.url=$DEPLOY_URL -Ddeploy.username=$DEPLOY_USER -Ddeploy.password=$DEPLOY_PASSWORD
 
-#after_failure:
+after_failure:
+  - ./send_jira_ticket.sh
 
 #before_deploy:
-
-
-#--------------------------------------------------------------------
-# deployment
-#--------------------------------------------------------------------
 
 #deploy:
 #  skip_cleanup: true
