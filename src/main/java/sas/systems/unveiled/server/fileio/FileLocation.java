@@ -1,11 +1,11 @@
 package sas.systems.unveiled.server.fileio;
 
-public class Location {
+public class FileLocation {
 
 	private double longitude;
 	private double latitude;
 	
-	public Location(double longitude, double latitude) {
+	public FileLocation(double longitude, double latitude) {
 		super();
 		this.longitude = longitude;
 		this.latitude = latitude;

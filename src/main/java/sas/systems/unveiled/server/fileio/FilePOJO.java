@@ -15,8 +15,6 @@
  */
 package sas.systems.unveiled.server.fileio;
 
-import java.util.Date;
-
 /**
  * File POJO class. Represents a database entity.
  * 
@@ -25,14 +23,11 @@ import java.util.Date;
 public class FilePOJO {
 	
 	private int ownerId;
-	private String caption;
 	private String filename;
 	private String fileUrl;
 	private String thumbnailUrl;
-	private String mediatype;
-	private Date uploadedAt;
-	private long size;
-	private Location location;
+	private FileLocation location;
+	private FileMetadata metadata;
 	private boolean isPublic;
 	private boolean isVerified;
 	private int length;
@@ -43,14 +38,11 @@ public class FilePOJO {
 	/**
 	 * 
 	 * @param ownerId foreign key
-	 * @param caption
 	 * @param filename with suffix
 	 * @param fileUrl absolute
 	 * @param thumbnailUrl absolute
-	 * @param mediatype MIME type
-	 * @param uploadedAt Date object -> will be converted in UNIX timestamp (in seconds)
-	 * @param size byte
 	 * @param location
+	 * @param metadata
 	 * @param isPublic
 	 * @param isVerified
 	 * @param length in seconds
@@ -58,19 +50,16 @@ public class FilePOJO {
 	 * @param width
 	 * @param resolution eg. 1080, 1440, 2160, 4320
 	 */
-	public FilePOJO(int ownerId, String caption, String filename, String fileUrl, String thumbnailUrl,
-			String mediatype, Date uploadedAt, long size, Location location, boolean isPublic, boolean isVerified,
+	public FilePOJO(int ownerId, String filename, String fileUrl, String thumbnailUrl,
+			FileLocation location, FileMetadata metadata, boolean isPublic, boolean isVerified,
 			int length, int heigth, int width, String resolution) {
 		super();
 		this.ownerId = ownerId;
-		this.caption = caption;
 		this.filename = filename;
 		this.fileUrl = fileUrl;
 		this.thumbnailUrl = thumbnailUrl;
-		this.mediatype = mediatype;
-		this.uploadedAt = uploadedAt;
-		this.size = size;
 		this.location = location;
+		this.metadata = metadata;
 		this.isPublic = isPublic;
 		this.isVerified = isVerified;
 		this.length = length;
@@ -84,12 +73,6 @@ public class FilePOJO {
 	}
 	public void setOwnerId(int ownerId) {
 		this.ownerId = ownerId;
-	}
-	public String getCaption() {
-		return caption;
-	}
-	public void setCaption(String caption) {
-		this.caption = caption;
 	}
 	public String getFilename() {
 		return filename;
@@ -108,24 +91,6 @@ public class FilePOJO {
 	}
 	public void setThumbnailUrl(String thumbnailUrl) {
 		this.thumbnailUrl = thumbnailUrl;
-	}
-	public String getMediatype() {
-		return mediatype;
-	}
-	public void setMediatype(String mediatype) {
-		this.mediatype = mediatype;
-	}
-	public Date getUploadedAt() {
-		return uploadedAt;
-	}
-	public void setUploadedAt(Date uploadedAt) {
-		this.uploadedAt = uploadedAt;
-	}
-	public long getSize() {
-		return size;
-	}
-	public void setSize(long size) {
-		this.size = size;
 	}
 	public boolean isPublic() {
 		return isPublic;
