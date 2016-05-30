@@ -31,12 +31,12 @@ sudo: false
 # install imflux.jar (our own streaming library)
 # Unveiled-Server was installed before in this directory: SAS-Systems/Unveiled-Server
 # we install imflux to: SAS-Systems/inmflux (but actually does not matter)
-before_install:
-  - cd ..
-  - git clone --depth=50 --branch=master https://github.com/SAS-Systems/imflux.git imflux
-  - cd imflux
-  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B
-  - cd ../Unveiled-Server
+#before_install:
+#  - cd ..
+#  - git clone --depth=50 --branch=master https://github.com/SAS-Systems/imflux.git imflux
+#  - cd imflux
+#  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B
+#  - cd ../Unveiled-Server
 
 # build project
 script:
@@ -53,7 +53,7 @@ after_success:
   - mvn tomcat7:deploy -Ddeploy.url=$DEPLOY_URL -Ddeploy.username=$DEPLOY_USER -Ddeploy.password=$DEPLOY_PASSWORD
 
 after_failure:
-  - ./send_jira_ticket.sh
+  - sh send_jira_ticket.sh
 
 #before_deploy:
 
