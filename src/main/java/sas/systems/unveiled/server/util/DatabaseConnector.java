@@ -96,21 +96,21 @@ public class DatabaseConnector {
 			 */
 			int i = 1;
 			stmt.setInt(i++, file.getOwnerId());						// 1
-			stmt.setString(i++, file.getCaption());
+			stmt.setString(i++, file.getMetadata().getCaption());
 			stmt.setString(i++, file.getFilename());
 			stmt.setString(i++, file.getFileUrl());
 			stmt.setString(i++, file.getThumbnailUrl());				// 5
-			stmt.setString(i++, file.getMediatype());
-			stmt.setLong(i++, file.getUploadedAt().getTime()/1000);
-			stmt.setLong(i++, file.getSize()); // may only be int?
-			stmt.setDouble(i++, file.getLat());
-			stmt.setDouble(i++, file.getLng());							// 10
+			stmt.setString(i++, file.getMetadata().getMediatype());
+			stmt.setLong(i++, file.getMetadata().getUploadedAt().getTime()/1000);
+			stmt.setLong(i++, file.getMetadata().getSize()); // may only be int?
+			stmt.setDouble(i++, file.getLocation().getLatitude());
+			stmt.setDouble(i++, file.getLocation().getLongitude());							// 10
 			stmt.setBoolean(i++, file.isPublic());
 			stmt.setBoolean(i++, file.isVerified());
-			stmt.setInt(i++, file.getLength());
-			stmt.setInt(i++, file.getHeigth());
-			stmt.setInt(i++, file.getWidth());							// 15
-			stmt.setString(i, file.getResolution());
+			stmt.setInt(i++, file.getMediadata().getLength());
+			stmt.setInt(i++, file.getMediadata().getHeigth());
+			stmt.setInt(i++, file.getMediadata().getWidth());							// 15
+			stmt.setString(i, file.getMediadata().getResolution());
 			
 			// execute insert
 			final int entityId = stmt.executeUpdate();

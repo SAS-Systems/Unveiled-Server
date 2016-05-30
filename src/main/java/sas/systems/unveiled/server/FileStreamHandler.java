@@ -131,20 +131,20 @@ public class FileStreamHandler implements RtpSessionDataListener {
 			final int width = 0;
 			final String resolution = height + "x" + width; 
 			
-			FilePOJO fileEntity = new FilePOJO(author, fileHandle.getName(), filename, 
-					this.mediaUrlPrefix + String.valueOf(author) + "/" + fileHandle.getName(), 
-					thumbnailUrl, 
-					mediatype, 
-					new Date(), 
-					fileHandle.length(), 
-					0, 0, 
-					false, false, 
-					length, 
-					height, width, resolution);
-
-			if(!dbConnection.insertFile(fileEntity)) {
-				LOG.error("Could not write file metadata of file {} to database!", fileHandle.getName());
-			}
+//			FilePOJO fileEntity = new FilePOJO(author, fileHandle.getName(), filename, 
+//					this.mediaUrlPrefix + String.valueOf(author) + "/" + fileHandle.getName(), 
+//					thumbnailUrl, 
+//					mediatype, 
+//					new Date(), 
+//					fileHandle.length(), 
+//					0, 0, 
+//					false, false, 
+//					length, 
+//					height, width, resolution);
+//
+//			if(!dbConnection.insertFile(fileEntity)) {
+//				LOG.error("Could not write file metadata of file {} to database!", fileHandle.getName());
+//			}
 			
 		} catch (IOException e) {
 			LOG.error("File was not completely written!", e);

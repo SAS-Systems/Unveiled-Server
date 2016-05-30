@@ -155,8 +155,12 @@ public class FileUploadServlet extends HttpServlet {
 		final int height = 0;			// TODO calculate resolution [height]x[width]
 		final int width = 0;
 		final String resolution = height + "x" + width; 
-		FilePOJO fileEntity = new FilePOJO(params.getUser(), caption, params.getFileName(), fileUrl, thumbnailUrl, mediatype, 
-				new Date(), fileHandle.length(), params.getLatitude(), params.getLongitude(), params.getPublic(), false, length, height, width, resolution);
+		
+		// build file object
+		final FileLocation fileLocation = new FileLocation(params.getLongitude(), params.getLatitude());
+		final FileMetadata fileMetadata = new FileMetadata(caption, mediatype, new Date(), fileHandle.length());
+		final FileMediaData fileMediadata = new FileMediaData(length, height, width, resolution);
+		final FilePOJO fileEntity = new FilePOJO(params.getUser(), params.getFileName(), fileUrl, thumbnailUrl, fileLocation, fileMetadata, fileMediadata, params.getPublic(), false);
 		
 		return this.database.insertFile(fileEntity);
 	}

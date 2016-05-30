@@ -40,6 +40,7 @@ public class FilePOJO {
 	 * @param thumbnailUrl absolute
 	 * @param location
 	 * @param metadata
+	 * @param mediadata
 	 * @param isPublic
 	 * @param isVerified
 	 */
