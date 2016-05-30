@@ -24,9 +24,10 @@ import java.util.Date;
  */
 public class FilePOJO {
 	
-	private int ownerId;
+	private final int ownerId;
+	private final String filename;
+	
 	private String caption;
-	private String filename;
 	private String fileUrl;
 	private String thumbnailUrl;
 	private String mediatype;
@@ -44,49 +45,30 @@ public class FilePOJO {
 	/**
 	 * 
 	 * @param ownerId foreign key
-	 * @param caption
 	 * @param filename with suffix
-	 * @param fileUrl absolute
-	 * @param thumbnailUrl absolute
-	 * @param mediatype MIME type
-	 * @param uploadedAt Date object -> will be converted in UNIX timestamp (in seconds)
-	 * @param size byte
-	 * @param lat
-	 * @param lng
-	 * @param isPublic
-	 * @param isVerified
-	 * @param length in seconds
-	 * @param heigth
-	 * @param width
-	 * @param resolution eg. 1080, 1440, 2160, 4320
 	 */
-	public FilePOJO(int ownerId, String caption, String filename, String fileUrl, String thumbnailUrl,
-			String mediatype, Date uploadedAt, long size, double lat, double lng, boolean isPublic, boolean isVerified,
-			int length, int heigth, int width, String resolution) {
+	public FilePOJO(int ownerId, String filename) {
 		super();
 		this.ownerId = ownerId;
-		this.caption = caption;
+		this.caption = filename;
 		this.filename = filename;
-		this.fileUrl = fileUrl;
-		this.thumbnailUrl = thumbnailUrl;
-		this.mediatype = mediatype;
-		this.uploadedAt = uploadedAt;
-		this.size = size;
-		this.lat = lat;
-		this.lng = lng;
-		this.isPublic = isPublic;
-		this.isVerified = isVerified;
-		this.length = length;
-		this.heigth = heigth;
-		this.width = width;
-		this.resolution = resolution;
+		this.fileUrl = "";
+		this.thumbnailUrl = "";
+		this.mediatype = "video/mp4";
+		this.uploadedAt = new Date();
+		this.size = 0;
+		this.lat = 0.;
+		this.lng = 0.;
+		this.isPublic = false;
+		this.isVerified = false;
+		this.length = 0;
+		this.heigth = 0;
+		this.width = 0;
+		this.resolution = "n/a";
 	}
 	
 	public int getOwnerId() {
 		return ownerId;
-	}
-	public void setOwnerId(int ownerId) {
-		this.ownerId = ownerId;
 	}
 	public String getCaption() {
 		return caption;
@@ -96,9 +78,6 @@ public class FilePOJO {
 	}
 	public String getFilename() {
 		return filename;
-	}
-	public void setFilename(String filename) {
-		this.filename = filename;
 	}
 	public String getFileUrl() {
 		return fileUrl;

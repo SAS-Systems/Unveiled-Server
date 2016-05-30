@@ -17,7 +17,6 @@ package sas.systems.unveiled.server.fileio;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Properties;
 
 import javax.servlet.ServletConfig;
@@ -155,8 +154,19 @@ public class FileUploadServlet extends HttpServlet {
 		final int height = 0;			// TODO calculate resolution [height]x[width]
 		final int width = 0;
 		final String resolution = height + "x" + width; 
-		FilePOJO fileEntity = new FilePOJO(params.getUser(), caption, params.getFileName(), fileUrl, thumbnailUrl, mediatype, 
-				new Date(), fileHandle.length(), params.getLatitude(), params.getLongitude(), params.getPublic(), false, length, height, width, resolution);
+		FilePOJO fileEntity = new FilePOJO(params.getUser(), params.getFileName());
+		fileEntity.setCaption(caption);
+		fileEntity.setFileUrl(fileUrl);
+		fileEntity.setThumbnailUrl(thumbnailUrl);
+		fileEntity.setMediatype(mediatype);
+		fileEntity.setSize(fileHandle.length());
+		fileEntity.setLat(params.getLatitude());
+		fileEntity.setLng(params.getLongitude());
+		fileEntity.setPublic(params.getPublic());
+		fileEntity.setLength(length);
+		fileEntity.setHeigth(height);
+		fileEntity.setWidth(width);
+		fileEntity.setResolution(resolution);
 		
 		return this.database.insertFile(fileEntity);
 	}

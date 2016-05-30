@@ -17,7 +17,6 @@ package sas.systems.unveiled.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
 
@@ -131,16 +130,16 @@ public class FileStreamHandler implements RtpSessionDataListener {
 			final int width = 0;
 			final String resolution = height + "x" + width; 
 			
-			FilePOJO fileEntity = new FilePOJO(author, fileHandle.getName(), filename, 
-					this.mediaUrlPrefix + String.valueOf(author) + "/" + fileHandle.getName(), 
-					thumbnailUrl, 
-					mediatype, 
-					new Date(), 
-					fileHandle.length(), 
-					0, 0, 
-					false, false, 
-					length, 
-					height, width, resolution);
+			FilePOJO fileEntity = new FilePOJO(author, filename);
+			fileEntity.setCaption(fileHandle.getName());
+			fileEntity.setFileUrl(this.mediaUrlPrefix + String.valueOf(author) + "/" + fileHandle.getName());
+			fileEntity.setThumbnailUrl(thumbnailUrl);
+			fileEntity.setMediatype(mediatype);
+			fileEntity.setSize(fileHandle.length());
+			fileEntity.setLength(length);
+			fileEntity.setHeigth(height);
+			fileEntity.setWidth(width);
+			fileEntity.setResolution(resolution);
 
 			if(!dbConnection.insertFile(fileEntity)) {
 				LOG.error("Could not write file metadata of file {} to database!", fileHandle.getName());
