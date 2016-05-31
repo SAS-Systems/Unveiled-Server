@@ -81,13 +81,6 @@ public class RtspMessageHandler implements RtspRequestListener, RtspResponseList
 	}
 
 	@Override
-	public void describeRequestReceived(HttpRequest message, RtspParticipant participant) {
-		// TODO Auto-generated method stub
-		System.out.println(message);
-		participant.sendMessage(createErrorResponse(RtspResponseStatuses.NOT_IMPLEMENTED, message.headers()));
-	}
-
-	@Override
 	public void announceRequestReceived(HttpRequest message, RtspParticipant participant) {
 		final String seq = message.headers().get(RtspHeaders.Names.CSEQ);
 		final String contentType = message.headers().get(RtspHeaders.Names.CONTENT_TYPE);
@@ -99,10 +92,10 @@ public class RtspMessageHandler implements RtspRequestListener, RtspResponseList
 			participant.sendMessage(createErrorResponse(RtspResponseStatuses.UNAUTHORIZED, message.headers()));
 			return;
 		} else {
-			if(!isAuthorized(authorization)) {
-				participant.sendMessage(createErrorResponse(RtspResponseStatuses.UNAUTHORIZED, message.headers()));
-				return;
-			}
+//			if(!isAuthorized(authorization)) {
+//				participant.sendMessage(createErrorResponse(RtspResponseStatuses.UNAUTHORIZED, message.headers()));
+//				return;
+//			}
 		}
 		
 		if(message instanceof FullHttpRequest) {
@@ -111,13 +104,29 @@ public class RtspMessageHandler implements RtspRequestListener, RtspResponseList
 			
 			if(seq != null && contentType != null && contentType.contains("sdp") && content != null) {
 				// parse announce content
+				final String fileName = retrieveFileName(fullResponse.getUri());
+				final SdpParser parser = new SdpParser(content);
 				
+				FileStreamHandler streamHandler = new FileStreamHandler(this.sm);
+				streamHandler.setFileName(fileName);
 				return;
 			}
 		}
 		
 		// otherwise send error message
 		participant.sendMessage(createErrorResponse(RtspResponseStatuses.BAD_REQUEST, message.headers()));
+	}
+
+	private String retrieveFileName(String uri) {
+		final int lastSlash = uri.lastIndexOf('/');
+		return uri.substring(lastSlash, uri.length());
+	}
+
+	@Override
+	public void describeRequestReceived(HttpRequest message, RtspParticipant participant) {
+		// TODO Auto-generated method stub
+		System.out.println(message);
+		participant.sendMessage(createErrorResponse(RtspResponseStatuses.NOT_IMPLEMENTED, message.headers()));
 	}
 
 	@Override
@@ -202,7 +211,7 @@ public class RtspMessageHandler implements RtspRequestListener, RtspResponseList
 		
 		// check token
 		try {
-			int userId = Integer.valueOf(pairs.get("username"));
+			final int userId = Integer.valueOf(pairs.get("username"));
 			final String originalToken = loadOriginalToken(userId);
 			if(originalToken != null && originalToken.equals(pairs.get("nonce"))) {
 				return true;

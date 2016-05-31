@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,8 @@ public class FileStreamHandler implements RtpSessionDataListener {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(FileStreamHandler.class);
 	
+	private final AtomicBoolean isInitialized;
+	
 	private final int id;
 	private final SessionManager sm;
 	private final String mediaLocation;
@@ -65,6 +68,7 @@ public class FileStreamHandler implements RtpSessionDataListener {
 	public FileStreamHandler(SessionManager sessionManager) {
 		this.sm = sessionManager;
 		this.id = new Random().nextInt(100);
+		this.isInitialized = new AtomicBoolean(false);
 		
 		final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.MEDIA_PROPERTIES_FILE);
 		this.mediaLocation = props.getProperty(PropertiesLoader.MediaProps.SYSTEM_PATH_TO_MEDIA);
@@ -74,7 +78,7 @@ public class FileStreamHandler implements RtpSessionDataListener {
 	// RtpSessionDataListener -----------------------------------------------------------------------------------------
 	@Override
 	public void dataPacketReceived(RtpSession session, RtpParticipantInfo participant, DataPacket packet) {
-		if(participant.getSsrc() != this.ssrc) {
+		if(!this.isInitialized.get() && participant.getSsrc() != this.ssrc) {
 			return;
 		}
 		
@@ -103,6 +107,10 @@ public class FileStreamHandler implements RtpSessionDataListener {
 	 * @param suffix (filetype)
 	 */
 	public void initialize(long ssrc, int author, String filename, String suffix) {
+		if(this.isInitialized.get()) {
+			return;
+		}
+		
 		this.dbConnection = new DatabaseConnector();
 		this.ssrc = ssrc;
 		this.author = author;
@@ -111,6 +119,7 @@ public class FileStreamHandler implements RtpSessionDataListener {
 		
 		this.fileWriter = new FileWriter(this.mediaLocation + this.author + "/", this.filename, this.suffix);
 		sm.registerListener(this);
+		this.isInitialized.set(true);
 	}
 	
 	/**
@@ -118,6 +127,10 @@ public class FileStreamHandler implements RtpSessionDataListener {
 	 * corresponding database entry. Afterwards realeses all used resources
 	 */
 	public void tieUp() {
+		if(!this.isInitialized.getAndSet(false)) {
+			return;
+		}
+		
 		sm.unregisterListener(this);
 		try {
 			File fileHandle = fileWriter.close();
@@ -165,5 +178,13 @@ public class FileStreamHandler implements RtpSessionDataListener {
 
 	public String getFiletype() {
 		return suffix;
+	}
+
+	public void setFileName(String fileName) {
+		if(this.isInitialized.get()) {
+			throw new IllegalArgumentException("This property can only be set before initialization!");
+		}
+		
+		this.filename = fileName;
 	}
 }
