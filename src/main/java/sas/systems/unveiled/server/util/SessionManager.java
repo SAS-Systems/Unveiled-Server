@@ -114,7 +114,6 @@ public class SessionManager implements Serializable {
 		rtspSession.setUseNio(true);
 		rtspSession.setAutomatedRtspHandling(false);
 		rtspSession.addRequestListener(rtspHandler);
-		rtspSession.addResponseListener(rtspHandler);
 		
     	return rtpSession.init() && rtspSession.init();
     }
@@ -148,6 +147,12 @@ public class SessionManager implements Serializable {
     		rtspSession.terminate();
     	}
     }
+	
+	public void addDataReceiver(RtpParticipant remoteParticipant) {
+		if(rtpSession.addReceiver(remoteParticipant)) {
+			System.out.println("Failed to add participant to RTP session");
+		}
+	}
     
     public void registerListener(RtpSessionDataListener listener) {
     	rtpSession.addDataListener(listener);

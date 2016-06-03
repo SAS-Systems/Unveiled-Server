@@ -70,15 +70,14 @@ public final class PropertiesLoader {
 	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
 	 */
 	public static final class DBProps {
-		/**
-		 * Private constructor to hide implicit public one
-		 */
-		private DBProps(){};
-		
 		public static final String DB_HOST = "database.host";
 		public static final String DB_USER = "database.user";
 		public static final String DB_PASSWORD = "database.password";
 		public static final String DB_NAME = "database.name";
+		/**
+		 * Private constructor to hide implicit public one
+		 */
+		private DBProps(){};
 	}
 
 	/**
@@ -86,16 +85,15 @@ public final class PropertiesLoader {
 	 * 
 	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
 	 */
-	public static final class SessionProps {
-		/**
-		 * Private constructor to hide implicit public one
-		 */
-		private SessionProps(){};
-		
+	public static final class SessionProps {		
 		public static final String HOST = "host";
 		public static final String RTP_PORT = "rtp.port";
 		public static final String RTCP_PORT = "rtcp.port";
 		public static final String RTSP_PORT = "rtsp.port";
+		/**
+		 * Private constructor to hide implicit public one
+		 */
+		private SessionProps(){};
 	}
 
 	/**
@@ -104,14 +102,13 @@ public final class PropertiesLoader {
 	 * @author <a href="https://github.com/CodeLionX">CodeLionX</a>
 	 */
 	public static final class MediaProps {
+		public static final String URL_MEDIA_PATH_PREFIX = "media.location.urlPathPrefix";
+		public static final String SYSTEM_PATH_TO_MEDIA = "media.location.systemPathPrefix";
+		public static final String REL_PATH_TO_DEFAULT_THUMBNAIL = "media.default.thumbnail";
 		/**
 		 * Private constructor to hide implicit public one
 		 */
 		private MediaProps(){};
-		
-		public static final String URL_MEDIA_PATH_PREFIX = "media.location.urlPathPrefix";
-		public static final String SYSTEM_PATH_TO_MEDIA = "media.location.systemPathPrefix";
-		public static final String REL_PATH_TO_DEFAULT_THUMBNAIL = "media.default.thumbnail";
 	}
 
 	/**
