@@ -43,13 +43,6 @@ public class ConnectionListener extends HttpServlet {
 	
 	@EJB
 	private SessionManager sm;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public ConnectionListener() {
-        super();
-    }
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
