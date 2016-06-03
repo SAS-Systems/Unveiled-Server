@@ -1,6 +1,7 @@
 # Unveiled-Server (Java-Stack)
 [![Build Status](https://travis-ci.org/SAS-Systems/Unveiled-Server.svg?branch=master)](https://travis-ci.org/SAS-Systems/Unveiled-Server)
 [![Coverage Status](https://coveralls.io/repos/github/SAS-Systems/Unveiled-Server/badge.svg?branch=master)](https://coveralls.io/github/SAS-Systems/Unveiled-Server?branch=master)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/97ac7ec068ee4eb787fae263c45829f7)](https://www.codacy.com/app/sebastian-schmidl/Unveiled-Server?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SAS-Systems/Unveiled-Server&amp;utm_campaign=Badge_Grade)
 
 
 ## API Description
