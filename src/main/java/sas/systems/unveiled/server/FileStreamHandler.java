@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import sas.systems.imflux.packet.DataPacket;
 import sas.systems.imflux.participant.RtpParticipantInfo;
+import sas.systems.imflux.participant.RtspParticipant;
 import sas.systems.imflux.session.rtp.RtpSession;
 import sas.systems.imflux.session.rtp.RtpSessionDataListener;
 import sas.systems.unveiled.server.fileio.FilePOJO;
@@ -44,41 +45,46 @@ import sas.systems.unveiled.server.util.SessionManager;
 public class FileStreamHandler implements RtpSessionDataListener {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(FileStreamHandler.class);
+	private static final IllegalArgumentException ALREADY_INITIALIZED =  new IllegalArgumentException("This property can only be set before initialization!");
 	
 	private final AtomicBoolean isInitialized;
 	
 	private final int id;
 	private final SessionManager sm;
+	private final RtspParticipant participant;
 	private final String mediaLocation;
 	private final String mediaUrlPrefix;
+	private final String urlDefaultThumbnail;
 	
 	private DatabaseConnector dbConnection;
-	private long ssrc;
+	private FileWriter fileWriter;
 	private int author;
 	private String filename;
-	private String suffix;
-	private FileWriter fileWriter;
-	
+	private int payloadType;
+	private String mediaType;
 	
 
 	// Constructors ---------------------------------------------------------------------------------------------------
 	/**
 	 * 
 	 */
-	public FileStreamHandler(SessionManager sessionManager) {
+	public FileStreamHandler(SessionManager sessionManager, RtspParticipant participant) {
 		this.sm = sessionManager;
+		this.participant = participant;
 		this.id = new Random().nextInt(100);
 		this.isInitialized = new AtomicBoolean(false);
 		
 		final Properties props = PropertiesLoader.loadPropertiesFile(PropertiesLoader.MEDIA_PROPERTIES_FILE);
 		this.mediaLocation = props.getProperty(PropertiesLoader.MediaProps.SYSTEM_PATH_TO_MEDIA);
 		this.mediaUrlPrefix = props.getProperty(PropertiesLoader.MediaProps.URL_MEDIA_PATH_PREFIX);
+		this.urlDefaultThumbnail = this.mediaUrlPrefix 
+				+ props.getProperty(PropertiesLoader.MediaProps.REL_PATH_TO_DEFAULT_THUMBNAIL);
 	}
 	
 	// RtpSessionDataListener -----------------------------------------------------------------------------------------
 	@Override
 	public void dataPacketReceived(RtpSession session, RtpParticipantInfo participant, DataPacket packet) {
-		if(!this.isInitialized.get() && participant.getSsrc() != this.ssrc) {
+		if(!this.isInitialized.get() && participant.getSsrc() != this.participant.getRtpParticipant().getSsrc()) {
 			return;
 		}
 		
@@ -106,18 +112,16 @@ public class FileStreamHandler implements RtpSessionDataListener {
 	 * @param filename
 	 * @param suffix (filetype)
 	 */
-	public void initialize(long ssrc, int author, String filename, String suffix) {
+	public void initialize() {
 		if(this.isInitialized.get()) {
 			return;
 		}
 		
 		this.dbConnection = new DatabaseConnector();
-		this.ssrc = ssrc;
-		this.author = author;
-		this.filename = filename;
-		this.suffix = suffix;
+		final String filename = this.filename.substring(0, this.filename.indexOf('.'));
+		final String suffix = this.filename.substring(this.filename.indexOf('.')+1, this.filename.length());
 		
-		this.fileWriter = new FileWriter(this.mediaLocation + this.author + "/", this.filename, this.suffix);
+		this.fileWriter = new FileWriter(this.mediaLocation + this.author + "/", filename, suffix);
 		sm.registerListener(this);
 		this.isInitialized.set(true);
 	}
@@ -137,8 +141,6 @@ public class FileStreamHandler implements RtpSessionDataListener {
 			LOG.debug("{} ({} bytes) was written to filesystem.", fileHandle, fileHandle.length());
 			
 			// store meta information in the database
-			final String mediatype = "";	// TODO standard value? with mapping suffix -> MIMEtype? 
-			final String thumbnailUrl = ""; // TODO generate thumbnail
 			final int length = 0;			// TODO calculate length [in seconds]
 			final int height = 0;			// TODO calculate resolution [height]x[width]
 			final int width = 0;
@@ -146,8 +148,8 @@ public class FileStreamHandler implements RtpSessionDataListener {
 			
 			FilePOJO fileEntity = new FilePOJO(author, fileHandle.getName(), filename, 
 					this.mediaUrlPrefix + String.valueOf(author) + "/" + fileHandle.getName(), 
-					thumbnailUrl, 
-					mediatype, 
+					this.urlDefaultThumbnail, 
+					this.mediaType, 
 					new Date(), 
 					fileHandle.length(), 
 					0, 0, 
@@ -176,15 +178,51 @@ public class FileStreamHandler implements RtpSessionDataListener {
 		return filename;
 	}
 
-	public String getFiletype() {
-		return suffix;
-	}
-
 	public void setFileName(String fileName) {
 		if(this.isInitialized.get()) {
-			throw new IllegalArgumentException("This property can only be set before initialization!");
+			throw ALREADY_INITIALIZED;
 		}
 		
 		this.filename = fileName;
+	}
+
+	public int getPayloadType() {
+		return payloadType;
+	}
+
+	public void setPayloadType(int payloadType) {
+		if(this.isInitialized.get()) {
+			throw ALREADY_INITIALIZED;
+		}
+		
+		this.payloadType = payloadType;
+	}
+
+	public String getMediaType() {
+		return mediaType;
+	}
+
+	public void setMediaType(String mediaType) {
+		if(this.isInitialized.get()) {
+			throw ALREADY_INITIALIZED;
+		}
+		
+		this.mediaType = mediaType;
+	}
+	
+	public long getSsrc() {
+		return this.participant.getRtpParticipant().getSsrc();
+	}
+
+	public RtspParticipant getParticipant() {
+		return participant;
+	}
+
+	public void setAuthor(int retrieveUsername) {
+		if(this.isInitialized.get()) {
+			throw ALREADY_INITIALIZED;
+		}
+		
+		this.author = retrieveUsername;
 	}
 }
