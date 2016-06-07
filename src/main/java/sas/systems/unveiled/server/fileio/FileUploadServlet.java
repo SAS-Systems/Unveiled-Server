@@ -147,8 +147,8 @@ public class FileUploadServlet extends HttpServlet {
 	 * @return {@code true} if the record was successfully inserted, {@code false} otherwise
 	 */
 	private boolean createDbEntry(FileParameters params, File fileHandle) {
-		final String caption = params.getFile().getName();
-		final String fileUrl = this.urlMediaPathPrefix + String.valueOf(params.getUser()) + "/" + caption;
+		final String caption = params.getFileName();
+		final String fileUrl = this.urlMediaPathPrefix + String.valueOf(params.getUser()) + "/" + params.getFileName();
 		final String thumbnailUrl = this.urlDefaultThumbnail; // TODO generate thumbnail
 		final String mediatype = params.getFile().getContentType();
 		final int length = 0;			// TODO calculate length [in seconds]
